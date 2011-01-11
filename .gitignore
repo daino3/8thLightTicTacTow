@@ -1,5 +1,5 @@
-**/.DS_Store
-nbproject
-manifest.mf
-build.xml
-
+logs/*
+!.gitkeep
+node_modules/
+tmp
+.DS_Store

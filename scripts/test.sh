@@ -1,10 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
-base_dir=`dirname $0`
+BASE_DIR=`dirname $0`
 
-tests=$1
-if [[ $tests = "" ]]; then
-  tests="all"
-fi
+echo ""
+echo "Starting Karma Server (http://karma-runner.github.io)"
+echo "-------------------------------------------------------------------"
 
-java -jar "$base_dir/../test/lib/jstestdriver/JsTestDriver.jar" --config "$base_dir/../jsTestDriver.conf" --tests "$tests"
+$BASE_DIR/../node_modules/karma/bin/karma start $BASE_DIR/../config/karma.conf.js $*
