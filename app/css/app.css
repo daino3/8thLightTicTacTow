@@ -34,4 +34,10 @@
   height: 100px;
   width: 100px;
   display: inline-block;
+  text-align: center;
+}
+
+#game-board div div {
+  font-size: 90px;
+  overflow: hidden;
 }
