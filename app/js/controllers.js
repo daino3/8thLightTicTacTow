@@ -4,6 +4,11 @@
 
 var myControllers = angular.module('myApp.controllers', [])
 
+myControllers.controller('MyCtrl1', [
+  function() {
+
+  }])
+
 myControllers.controller('MyCtrl1', ['$firebase', '$scope',
   function($firebase, $scope) {
   var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
