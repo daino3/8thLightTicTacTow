@@ -28,3 +28,10 @@
   content: "";
   padding: 0;
 }
+
+#game-board div{
+  border: 2px solid black;
+  height: 100px;
+  width: 100px;
+  display: inline-block;
+}
