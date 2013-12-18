@@ -13,19 +13,15 @@ myControllers.controller('Game', ['$firebase', '$scope',
   function($firebase, $scope) {
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
-    
+
+    $scope.wins = []
+    $scope.losses = []
     $scope.winner = false
     $scope.playerMarker = "X"
     $scope.board = [
-      [{'id' : 'A1','letter': ''},
-       {'id' : 'A2','letter': ''},
-       {'id' : 'A3','letter': ''}],
-      [{'id' : 'B1','letter': ''},
-       {'id' : 'B2','letter': ''},
-       {'id' : 'B3','letter': ''}],
-      [{'id' : 'C1','letter': ''},
-       {'id' : 'C2','letter': ''},
-       {'id' : 'C3','letter': ''}]
+      [{'id' : 'A1','letter': ''}, {'id' : 'A2','letter': ''}, {'id' : 'A3','letter': ''}],
+      [{'id' : 'B1','letter': ''}, {'id' : 'B2','letter': ''}, {'id' : 'B3','letter': ''}],
+      [{'id' : 'C1','letter': ''}, {'id' : 'C2','letter': ''}, {'id' : 'C3','letter': ''}]
     ];
 
     $scope.takeSquare = function(column) {
@@ -60,23 +56,45 @@ myControllers.controller('Game', ['$firebase', '$scope',
 
     $scope.checkRows = function(){
       angular.forEach($scope.board, function(row) {
-        var collection = []
+        var rowContents = []
         angular.forEach(row, function(box) {
-          collection.push(box.letter)
+          rowContents.push(box.letter)
         })
-        if (collection.allSameValues()) { 
-          alert("We Have a Winner!!")
-          $scope.gameOver = true; 
-        };  
+        $scope.lookForWinner(rowContents)
       })
     }
 
     $scope.checkColumns = function() {
-    
+      for (var i = 0; i < 3; i++) {
+        var columnContents = []
+        angular.forEach($scope.board, function(row) {
+          columnContents.push(row[i].letter);
+        })
+        $scope.lookForWinner(columnContents)
+      }
     }
 
     $scope.checkDiagonals = function() {
+      var b = $scope.board
+      var topBottom = [b[0][0].letter, b[1][1].letter, b[2][2].letter]
+      var bottomTop = [b[2][0].letter, b[1][1].letter, b[0][2].letter]
+      $scope.lookForWinner(topBottom)
+      $scope.lookForWinner(bottomTop);
+    }
 
+    $scope.resetBoard = function() {
+      angular.forEach($scope.board, function(row) {
+        angular.forEach(row, function(box) {
+          box.letter = ""
+        })
+      })
+    }
+
+    $scope.lookForWinner = function(group) {
+      if ( group.allSameValues() ) { 
+        alert("We Have a Winner!!")
+        $scope.gameOver = true; 
+      };  
     }
 
     $scope.gameOver = function() {
