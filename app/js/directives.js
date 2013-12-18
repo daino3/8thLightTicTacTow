@@ -3,7 +3,7 @@
 /* Directives */
 
 
-var appDirectives = angular.module('myApp.directives', [])
+var appDirectives = angular.module('directives', [])
 
 appDirectives.directive('appVersion', ['version', 
   function(version) {

@@ -2,17 +2,18 @@
 
 
 // Declare app level module which depends on filters, and services
-var app = angular.module('myApp', [
+var myApp = angular.module('myApp', [
   'ngRoute',
-  'myApp.filters',
-  'myApp.services',
-  'myApp.directives',
-  'myApp.controllers',
+  'filters',
+  'services',
+  'directives',
+  'controllers',
   'firebase'
 ])
 
-app.config(['$routeProvider', function($routeProvider) {
+myApp.config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/welcome', {templateUrl: 'partials/welcome.html', controller: 'Welcome'});
-  $routeProvider.when('/game', {templateUrl: 'partials/game.html', controller: 'Game'});
-  $routeProvider.otherwise({redirectTo: '/view1'});
+  $routeProvider.when('/localgame', {templateUrl: 'partials/game.html', controller: 'LocalGame'});
+  $routeProvider.when('/AIgame', {templateUrl: 'partials/game.html', controller: 'AIGame'});
+  $routeProvider.otherwise({redirectTo: '/welcome'});
 }]);
