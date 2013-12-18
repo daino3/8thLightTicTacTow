@@ -10,12 +10,14 @@
 
 ### Overview of the Solution
 
-I wrote the challenge using angularjs as a framework and used Firebase as a backend. I implemented a little more funtionality than the challenge required to become better accustomed with both. A user can create a game and play against a friend in the hosted version while locally can play against someone or against the unbeatable AI - but what's the fun of that??
+I wrote the challenge using angularjs as a framework and used Firebase as a backend. I implemented a little more funtionality than the challenge required to become better accustomed with both. A user can create a game and play against a remote friend in the hosted version. Locally, the user can play against someone by taking turns with the mouse or against an unbeatable AI - but what's the fun of that??
 
 ### Running the app locally
 ```
 $ scripts/web-server.js
 ```
+The app runs on localhost:8000.
+
 ### Running unit tests
 
 Karma and Jasmine run:
