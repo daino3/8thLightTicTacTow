@@ -1,12 +1,7 @@
-<body ng-controller="MyController">
-<div id="messagesDiv">
-  <div ng-repeat="msg in messages"><em>{{msg.from}}</em>: {{msg.body}}</div>
-</div>
-<input type="text" ng-model="name" placeholder="Name">
-<input type="text" ng-model="msg" ng-keydown="addMessage($event)" placeholder="Message...">
+<body ng-controller="MyControllers">
 
-<div ng-repeat="row in rows" id="game-board">
+<div ng-repeat="row in board" id="game-board">
     <div id="{{column.id}}" ng-repeat="column in row">
-        <div ng-click="takeSquare(column)">{{column.letter}} </div>
+        <div ng-click="takeSquare(column)">{{column.letter}}</div>
     </div>
 </div>

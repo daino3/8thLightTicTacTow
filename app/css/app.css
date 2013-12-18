@@ -41,3 +41,8 @@
   font-size: 90px;
   overflow: hidden;
 }
+
+#game-board div div:hover{
+  cursor: pointer;
+  background-color: #DCDCDC;  
+}
