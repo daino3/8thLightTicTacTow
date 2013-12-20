@@ -13,10 +13,6 @@ appServices.factory('gameService',
   function(){
     return {
 
-      greeting: function() {
-        return "Hello"
-      },
-
       gameBoard: function() {
         var board = [
           [{'id' : 'A1','letter': ''}, {'id' : 'A2','letter': ''}, {'id' : 'A3','letter': ''}],
@@ -88,6 +84,8 @@ appServices.factory('gameService',
     }
   }
 );
+
+//----------- Prototypes --------------//
 
 Array.prototype.allSameValues = function() {
   for (var i = 1; i < this.length; i++) {

@@ -4,14 +4,9 @@
 
 var myControllers = angular.module('controllers', ['services'])
 
-myControllers.controller('Welcome', ['$scope', 'gameService', 
-  function($scope, gameService) {
+myControllers.controller('Welcome', ['$scope', 
+  function($scope) {
 
-    $scope.message = "" 
-
-    $scope.sayGreeting = function() {
-      $scope.message = gameService.greeting(); // calls greeting function fom gameService
-    }
   }])
 
 // ----------- LOCAL GAME ------------------//
@@ -21,8 +16,8 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
-    // $scope.wins = []
-    // $scope.losses = []
+    $scope.playerName = ""
+    $scope.record = {wins: 0, losses: 0}
     $scope.winner = false
     $scope.playerMarker = "X"
     $scope.compMarker = "O"
@@ -46,8 +41,17 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
       $scope.board = gameService.gameBoard()      
     }
 
-    // $scope.gameOver = function() {
+    $scope.setName = function(e) {
+      if (e.keyCode != 13) return;
+        $scope.playerName = $scope.name
+    }
 
+    $scope.pickwhoGoesFirst = function() {
+      if ()
+    }    
+
+    // $scope.gameOver = function() {
+    //   if ()
     // }
 
   }])
@@ -59,8 +63,8 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
-    // $scope.wins = []
-    // $scope.losses = []
+    $scope.playerName = ""
+    $scope.record = {wins: 0, losses: 0}
     $scope.winner = false
     $scope.playerMarker = "X"
     $scope.compMarker = "O"
@@ -73,15 +77,22 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     }
 
     $scope.checkForWinner = function() {
-      gameService.checkForWinner($scope.board)
+      gameService.checkForWinner($scope.board);
     }
 
     $scope.switchPlayer = function() {
-      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
+      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker);
     }
 
     $scope.resetBoard = function() {
-      $scope.board = gameService.gameBoard()      
+      $scope.board = gameService.gameBoard();  
+    }
+
+    $scope.setName = function(e) {
+      if (e.keyCode != 13) return;
+        $scope.playerName = $scope.name
     }
 
   }])
+
+// ----------- HOSTED GAME ------------------//

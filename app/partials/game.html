@@ -6,4 +6,11 @@
     </div>
 </div>
 
-<button ng-click="resetBoard()">Reset</button>
+<button ng-click="resetBoard()" id="reset-button">Reset</button>
+
+<div id="name-and-record-div">
+  <h3>Insert Player Name</h3>
+  <input type="text" ng-model="name" placeholder="Name" ng-keydown="setName($event)">
+  <p>{{playerName}}</p>
+  <p>wins: {{record.wins}}, losses: {{record.losses}}</p>
+</div>
