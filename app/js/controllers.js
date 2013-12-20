@@ -1,54 +1,68 @@
 'use strict';
 
-/* Controllers */
-
 var myControllers = angular.module('controllers', ['services'])
 
-myControllers.controller('Welcome', ['$scope', 'gameService', 
-  function($scope, gameService) {
+myControllers.controller('Welcome', ['$scope', 
+  function($scope) {
 
-    $scope.message = "" 
-
-    $scope.sayGreeting = function() {
-      $scope.message = gameService.greeting(); // calls greeting function fom gameService
-    }
   }])
 
 // ----------- LOCAL GAME ------------------//
 
-myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
-  function($firebase, $scope, gameService) {
+myControllers.controller('LocalGame', ['$scope', 'gameService',
+  function($scope, gameService) {
     
-    var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
-
-    // $scope.wins = []
-    // $scope.losses = []
-    $scope.winner = false
+    $scope.playerName = ""
+    $scope.playerRecord = {wins: 0, losses: 0}
     $scope.playerMarker = "X"
-    $scope.compMarker = "O"
+    $scope.opponentMarker = "O"
+    $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
 
     $scope.takeSquare = function(box) {
-      gameService.takeSquare(box, $scope.playerMarker);
-      $scope.checkForWinner();
-      $scope.switchPlayer();
-    }
+      if ($scope.currentPlayer == "") {
+        alert("You must flip the coin to determine who goes first")
+      }
+      else {
+        gameService.takeSquare(box, $scope.currentPlayer);
 
-    $scope.checkForWinner = function() {
-      gameService.checkForWinner($scope.board)
+        if (gameService.checkForWinner($scope.board) === true) {
+          alert($scope.currentPlayer + " has won!!")
+          $scope.saveWin();
+          $scope.resetBoard();
+        }
+        else {
+          $scope.switchPlayer();
+        }
+      }
     }
 
     $scope.switchPlayer = function() {
-      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
+      $scope.currentPlayer = ($scope.currentPlayer == $scope.playerMarker) ?  $scope.opponentMarker : $scope.playerMarker;
     }
 
     $scope.resetBoard = function() {
       $scope.board = gameService.gameBoard()      
     }
 
-    // $scope.gameOver = function() {
+    $scope.setName = function(e) {
+      if (e.keyCode != 13) return;
+        $scope.playerName = $scope.name
+    }
 
-    // }
+    $scope.determineWhoGoesFirst = function() {
+      if ($scope.currentPlayer === "") {
+        $scope.currentPlayer = gameService.flipCoin()
+        alert("It's "+$scope.currentPlayer+"'s turn")
+      }
+      else {
+        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
+      }
+    }    
+
+    $scope.saveWin = function() {
+      ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
+    }
 
   }])
 
@@ -59,8 +73,8 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
-    // $scope.wins = []
-    // $scope.losses = []
+    $scope.playerName = ""
+    $scope.record = {wins: 0, losses: 0}
     $scope.winner = false
     $scope.playerMarker = "X"
     $scope.compMarker = "O"
@@ -73,15 +87,22 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     }
 
     $scope.checkForWinner = function() {
-      gameService.checkForWinner($scope.board)
+      gameService.checkForWinner($scope.board);
     }
 
     $scope.switchPlayer = function() {
-      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
+      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker);
     }
 
     $scope.resetBoard = function() {
-      $scope.board = gameService.gameBoard()      
+      $scope.board = gameService.gameBoard();  
+    }
+
+    $scope.setName = function(e) {
+      if (e.keyCode != 13) return;
+        $scope.playerName = $scope.name
     }
 
   }])
+
+// ----------- HOSTED GAME ------------------//

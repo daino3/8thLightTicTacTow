@@ -13,10 +13,6 @@ appServices.factory('gameService',
   function(){
     return {
 
-      greeting: function() {
-        return "Hello"
-      },
-
       gameBoard: function() {
         var board = [
           [{'id' : 'A1','letter': ''}, {'id' : 'A2','letter': ''}, {'id' : 'A3','letter': ''}],
@@ -26,9 +22,9 @@ appServices.factory('gameService',
         return board 
       },
 
-      takeSquare: function(box, playerMarker) {
+      takeSquare: function(box, currentPlayer) {
         if (!box.letter) {
-          box.letter = playerMarker;
+          box.letter = currentPlayer;
         }
         else {
           alert('select an open square!!');
@@ -36,58 +32,53 @@ appServices.factory('gameService',
       },
 
       checkForWinner: function(board) {
-        this.checkRows(board);
-        this.checkColumns(board);
-        this.checkDiagonals(board);
+        var winner = false
+        if (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)){
+          winner = true
+        }
+        return winner
       },
 
       checkRows: function(board) {
-        var self = this
+        var foundWinner = false
         angular.forEach(board, function(row) {
           var rowContents = []
           angular.forEach(row, function(box) {
             rowContents.push(box.letter)
           })
-          self.winCheck(rowContents)
+          if (rowContents.allSameValues() === true) {
+            foundWinner = true;
+          }
         })
+        return foundWinner
       },
 
       checkColumns: function(board) {
-        var self = this
         for (var i = 0; i < 3; i++) {
           var columnContents = []
           angular.forEach(board, function(row) {
             columnContents.push(row[i].letter);
           })
-          self.winCheck(columnContents)
+          if (columnContents.allSameValues()) return true;
         }
       },
 
       checkDiagonals: function(board) {
-        var b = board
-        var topBottom = [b[0][0].letter, b[1][1].letter, b[2][2].letter]
-        var bottomTop = [b[2][0].letter, b[1][1].letter, b[0][2].letter]
-        this.winCheck(topBottom);
-        this.winCheck(bottomTop);
+        var topBottom = [board[0][0].letter, board[1][1].letter, board[2][2].letter]
+        var bottomTop = [board[2][0].letter, board[1][1].letter, board[0][2].letter]
+        if (topBottom.allSameValues() || bottomTop.allSameValues()) return true;
       },
 
-      winCheck: function(group) {
-        if ( group.allSameValues() ) { 
-          alert("We Have a Winner!!")
-        }  
+      flipCoin: function() {
+        var coin = Math.floor(Math.random() * 2);
+        return (coin === 0) ? "O" : "X";
       },
 
-      switchPlayer: function(winner, playerMarker) {
-        if (!winner) {
-          return (playerMarker == 'X') ? "O" : "X";
-        }
-        else {
-          alert(winner + 'has won!!')
-        }
-      },
     }
   }
 );
+
+//----------- Prototypes --------------//
 
 Array.prototype.allSameValues = function() {
   for (var i = 1; i < this.length; i++) {

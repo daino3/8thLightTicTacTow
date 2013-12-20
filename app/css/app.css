@@ -46,3 +46,16 @@
   cursor: pointer;
   background-color: #DCDCDC;  
 }
+
+#name-and-record-div {
+  border: 2px solid black;
+  border-radius: 5px;
+  margin-top: 10px;
+  padding: 10px;
+  width: 300px;
+}
+
+#reset-button {
+  margin-top: 10px;
+  background-color: 
+}
