@@ -25,75 +25,25 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
     // $scope.losses = []
     $scope.winner = false
     $scope.playerMarker = "X"
-    $scope.board = gameService.gameBoard();
+    $scope.compMarker = "O"
+    $scope.board = gameService.gameBoard()
 
-    $scope.takeSquare = function(column) {
-      if (!column.letter) {
-        column.letter = $scope.playerMarker
-        $scope.checkForWinner();
-      }
-      else {
-        alert('select an open square!!')
-      }
-    };
-
-    $scope.checkForWinner = function(){
-      $scope.checkRows();
-      $scope.checkColumns();
-      $scope.checkDiagonals();
+    $scope.takeSquare = function(box) {
+      gameService.takeSquare(box, $scope.playerMarker);
+      $scope.checkForWinner();
       $scope.switchPlayer();
-    };
-
-    $scope.checkRows = function(){
-      angular.forEach($scope.board, function(row) {
-        var rowContents = []
-        angular.forEach(row, function(box) {
-          rowContents.push(box.letter)
-        })
-        $scope.winCheck(rowContents)
-      })
     }
 
-    $scope.checkColumns = function() {
-      for (var i = 0; i < 3; i++) {
-        var columnContents = []
-        angular.forEach($scope.board, function(row) {
-          columnContents.push(row[i].letter);
-        })
-        $scope.winCheck(columnContents)
-      }
-    }
-
-    $scope.checkDiagonals = function() {
-      var b = $scope.board
-      var topBottom = [b[0][0].letter, b[1][1].letter, b[2][2].letter]
-      var bottomTop = [b[2][0].letter, b[1][1].letter, b[0][2].letter]
-      $scope.winCheck(topBottom)
-      $scope.winCheck(bottomTop);
+    $scope.checkForWinner = function() {
+      gameService.checkForWinner($scope.board)
     }
 
     $scope.switchPlayer = function() {
-      if (!$scope.winner) {
-        $scope.playerMarker = ($scope.playerMarker == 'X') ? "O" : "X";
-      }
-      else {
-        alert($scope.winner + 'has won!!')
-      }
-    };
-
-    $scope.resetBoard = function() {
-      angular.forEach($scope.board, function(row) {
-        angular.forEach(row, function(box) {
-          box.letter = ""
-        })
-      })
+      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
     }
 
-    $scope.winCheck = function(group) {
-      if ( group.allSameValues() ) { 
-        alert("We Have a Winner!!")
-        // $scope.gameOver = true; 
-      };  
+    $scope.resetBoard = function() {
+      $scope.board = gameService.gameBoard()      
     }
 
     // $scope.gameOver = function() {
@@ -101,16 +51,6 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
     // }
 
   }])
-
-Array.prototype.allSameValues = function() {
-  for (var i = 1; i < this.length; i++) {
-    if (this[i] !== this[0] || this[0] === "") {
-      return false; 
-    }
-  } 
-  return true;
-}
-
 
 // ----------- AI GAME ------------------//
 
@@ -127,9 +67,21 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     $scope.board = gameService.gameBoard()
 
     $scope.takeSquare = function(box) {
-
-      // gameService.takeSquare(box)
+      gameService.takeSquare(box, $scope.playerMarker);
+      $scope.checkForWinner();
+      $scope.switchPlayer();
     }
 
+    $scope.checkForWinner = function() {
+      gameService.checkForWinner($scope.board)
+    }
+
+    $scope.switchPlayer = function() {
+      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
+    }
+
+    $scope.resetBoard = function() {
+      $scope.board = gameService.gameBoard()      
+    }
 
   }])
