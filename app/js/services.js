@@ -22,9 +22,9 @@ appServices.factory('gameService',
         return board 
       },
 
-      takeSquare: function(box, playerMarker) {
+      takeSquare: function(box, currentPlayer) {
         if (!box.letter) {
-          box.letter = playerMarker;
+          box.letter = currentPlayer;
         }
         else {
           alert('select an open square!!');
@@ -68,19 +68,13 @@ appServices.factory('gameService',
       },
 
       winCheck: function(group) {
-        if ( group.allSameValues() ) { 
-          alert("We Have a Winner!!")
-        }  
+        return group.allSameValues() ? true : false
       },
 
-      switchPlayer: function(winner, playerMarker) {
-        if (!winner) {
-          return (playerMarker == 'X') ? "O" : "X";
-        }
-        else {
-          alert(winner + 'has won!!')
-        }
+      saveWin: function(playerMarker, currentPlayer, record) {
+        playerMarker === currentPlayer ? record.wins += 1 : record.losses += 1;
       },
+    
     }
   }
 );

@@ -17,24 +17,26 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
     $scope.playerName = ""
-    $scope.record = {wins: 0, losses: 0}
+    $scope.playerRecord = {wins: 0, losses: 0}
     $scope.winner = false
     $scope.playerMarker = "X"
-    $scope.compMarker = "O"
+    $scope.opponentMarker = "O"
+    $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
 
     $scope.takeSquare = function(box) {
-      gameService.takeSquare(box, $scope.playerMarker);
+      gameService.takeSquare(box, $scope.currentPlayer);
       $scope.checkForWinner();
-      $scope.switchPlayer();
+      console.log($scope.winner);
+      $scope.winner ? $scope.saveWin() : $scope.switchPlayer();
     }
 
     $scope.checkForWinner = function() {
-      gameService.checkForWinner($scope.board)
+      $scope.winner = gameService.checkForWinner($scope.board, $scope.winner)
     }
 
     $scope.switchPlayer = function() {
-      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker)
+      ($scope.currentPlayer == $scope.playerMarker) ? $scope.currentPlayer = $scope.opponentMarker : $scope.currentPlayer = $scope.playerMarker;
     }
 
     $scope.resetBoard = function() {
@@ -47,12 +49,12 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
     }
 
     $scope.pickwhoGoesFirst = function() {
-      if ()
+
     }    
 
-    // $scope.gameOver = function() {
-    //   if ()
-    // }
+    $scope.saveWin = function() {
+      gameService.saveWin($scope.playerMarker, $scope.currentPlayer, $scope.record)
+    }
 
   }])
 
