@@ -1,7 +1,5 @@
 'use strict';
 
-/* Controllers */
-
 var myControllers = angular.module('controllers', ['services'])
 
 myControllers.controller('Welcome', ['$scope', 
@@ -11,32 +9,36 @@ myControllers.controller('Welcome', ['$scope',
 
 // ----------- LOCAL GAME ------------------//
 
-myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
-  function($firebase, $scope, gameService) {
+myControllers.controller('LocalGame', ['$scope', 'gameService',
+  function($scope, gameService) {
     
-    var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
-
     $scope.playerName = ""
     $scope.playerRecord = {wins: 0, losses: 0}
-    $scope.winner = false
     $scope.playerMarker = "X"
     $scope.opponentMarker = "O"
     $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
 
     $scope.takeSquare = function(box) {
-      gameService.takeSquare(box, $scope.currentPlayer);
-      $scope.checkForWinner();
-      console.log($scope.winner);
-      $scope.winner ? $scope.saveWin() : $scope.switchPlayer();
-    }
+      if ($scope.currentPlayer == "") {
+        alert("You must flip the coin to determine who goes first")
+      }
+      else {
+        gameService.takeSquare(box, $scope.currentPlayer);
 
-    $scope.checkForWinner = function() {
-      $scope.winner = gameService.checkForWinner($scope.board, $scope.winner)
+        if (gameService.checkForWinner($scope.board) === true) {
+          alert($scope.currentPlayer + " has won!!")
+          $scope.saveWin();
+          $scope.resetBoard();
+        }
+        else {
+          $scope.switchPlayer();
+        }
+      }
     }
 
     $scope.switchPlayer = function() {
-      ($scope.currentPlayer == $scope.playerMarker) ? $scope.currentPlayer = $scope.opponentMarker : $scope.currentPlayer = $scope.playerMarker;
+      $scope.currentPlayer = ($scope.currentPlayer == $scope.playerMarker) ?  $scope.opponentMarker : $scope.playerMarker;
     }
 
     $scope.resetBoard = function() {
@@ -48,12 +50,18 @@ myControllers.controller('LocalGame', ['$firebase', '$scope', 'gameService',
         $scope.playerName = $scope.name
     }
 
-    $scope.pickwhoGoesFirst = function() {
-
+    $scope.determineWhoGoesFirst = function() {
+      if ($scope.currentPlayer === "") {
+        $scope.currentPlayer = gameService.flipCoin()
+        alert("It's "+$scope.currentPlayer+"'s turn")
+      }
+      else {
+        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
+      }
     }    
 
     $scope.saveWin = function() {
-      gameService.saveWin($scope.playerMarker, $scope.currentPlayer, $scope.record)
+      ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
     }
 
   }])

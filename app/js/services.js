@@ -32,49 +32,48 @@ appServices.factory('gameService',
       },
 
       checkForWinner: function(board) {
-        this.checkRows(board);
-        this.checkColumns(board);
-        this.checkDiagonals(board);
+        var winner = false
+        if (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)){
+          winner = true
+        }
+        return winner
       },
 
       checkRows: function(board) {
-        var self = this
+        var foundWinner = false
         angular.forEach(board, function(row) {
           var rowContents = []
           angular.forEach(row, function(box) {
             rowContents.push(box.letter)
           })
-          self.winCheck(rowContents)
+          if (rowContents.allSameValues() === true) {
+            foundWinner = true;
+          }
         })
+        return foundWinner
       },
 
       checkColumns: function(board) {
-        var self = this
         for (var i = 0; i < 3; i++) {
           var columnContents = []
           angular.forEach(board, function(row) {
             columnContents.push(row[i].letter);
           })
-          self.winCheck(columnContents)
+          if (columnContents.allSameValues()) return true;
         }
       },
 
       checkDiagonals: function(board) {
-        var b = board
-        var topBottom = [b[0][0].letter, b[1][1].letter, b[2][2].letter]
-        var bottomTop = [b[2][0].letter, b[1][1].letter, b[0][2].letter]
-        this.winCheck(topBottom);
-        this.winCheck(bottomTop);
+        var topBottom = [board[0][0].letter, board[1][1].letter, board[2][2].letter]
+        var bottomTop = [board[2][0].letter, board[1][1].letter, board[0][2].letter]
+        if (topBottom.allSameValues() || bottomTop.allSameValues()) return true;
       },
 
-      winCheck: function(group) {
-        return group.allSameValues() ? true : false
+      flipCoin: function() {
+        var coin = Math.floor(Math.random() * 2);
+        return (coin === 0) ? "O" : "X";
       },
 
-      saveWin: function(playerMarker, currentPlayer, record) {
-        playerMarker === currentPlayer ? record.wins += 1 : record.losses += 1;
-      },
-    
     }
   }
 );
