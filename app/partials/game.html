@@ -8,7 +8,7 @@
 
 <button ng-click="resetBoard()" id="reset-button">Reset</button>
 
-<button ng-click="determineWhoGoesFirst()" id="reset-button">Flip For Who Goes First</button>
+<button ng-click="startGame()" id="start-button">Flip For Who Goes First</button>
 
 <p>Next Player: {{currentPlayer}}</p>
 
@@ -16,5 +16,5 @@
   <h3>Insert Player Name</h3>
   <input type="text" ng-model="name" placeholder="Name" ng-keydown="setName($event)">
   <p>{{playerName}}</p>
-  <p>wins: {{playerRecord.wins}}, losses: {{playerRecord.losses}}</p>
+  <p>wins: {{playerRecord.wins}}, losses: {{playerRecord.losses}}, ties: {{playerRecord.ties}}</p>
 </div>

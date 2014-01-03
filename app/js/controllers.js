@@ -13,7 +13,7 @@ myControllers.controller('LocalGame', ['$scope', 'gameService',
   function($scope, gameService) {
     
     $scope.playerName = ""
-    $scope.playerRecord = {wins: 0, losses: 0}
+    $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
     $scope.playerMarker = "X"
     $scope.opponentMarker = "O"
     $scope.currentPlayer = ""
@@ -25,20 +25,23 @@ myControllers.controller('LocalGame', ['$scope', 'gameService',
       }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
+        $scope.winCheck();
+      } 
+    }
 
-        if (gameService.checkForWinner($scope.board) === true) {
-          alert($scope.currentPlayer + " has won!!")
-          $scope.saveWin();
-          $scope.resetBoard();
-        }
-        else {
-          $scope.switchPlayer();
-        }
+    $scope.winCheck = function() {
+      if (gameService.checkForWinner($scope.board) === true) {
+        alert($scope.currentPlayer + " has won!!")
+        $scope.saveWin();
+        $scope.resetBoard();
+      }
+      else {
+        $scope.switchPlayer();
       }
     }
 
     $scope.switchPlayer = function() {
-      $scope.currentPlayer = ($scope.currentPlayer == $scope.playerMarker) ?  $scope.opponentMarker : $scope.playerMarker;
+      $scope.currentPlayer = ($scope.currentPlayer === $scope.playerMarker) ? $scope.opponentMarker : $scope.playerMarker;
     }
 
     $scope.resetBoard = function() {
@@ -50,10 +53,10 @@ myControllers.controller('LocalGame', ['$scope', 'gameService',
         $scope.playerName = $scope.name
     }
 
-    $scope.determineWhoGoesFirst = function() {
+    $scope.startGame = function() {
       if ($scope.currentPlayer === "") {
-        $scope.currentPlayer = gameService.flipCoin()
-        alert("It's "+$scope.currentPlayer+"'s turn")
+        $scope.currentPlayer = gameService.flipCoin();
+        alert("It's "+$scope.currentPlayer+"'s turn");
       }
       else {
         alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
@@ -74,28 +77,41 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
     $scope.playerName = ""
-    $scope.record = {wins: 0, losses: 0}
-    $scope.winner = false
+    $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
     $scope.playerMarker = "X"
-    $scope.compMarker = "O"
+    $scope.computerMarker = "O"
+    $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
 
     $scope.takeSquare = function(box) {
-      gameService.takeSquare(box, $scope.playerMarker);
-      $scope.checkForWinner();
-      $scope.switchPlayer();
+      if ($scope.currentPlayer == "") {
+        alert("You must flip the coin to determine who goes first")
+      }
+      else {
+        gameService.takeSquare(box, $scope.currentPlayer);
+        $scope.winCheck();
+        $scope.switchPlayer();
+        setTimeout(console.log("Computer's Turn"), 1000)
+        $scope.computerMove();
+        $scope.winCheck();
+        $scope.switchPlayer();
+      }
     }
 
-    $scope.checkForWinner = function() {
-      gameService.checkForWinner($scope.board);
+    $scope.winCheck = function() {
+      if (gameService.checkForWinner($scope.board) === true) {
+        alert($scope.currentPlayer + " has won!!")
+        $scope.saveWin();
+        $scope.resetBoard();
+      }
     }
 
     $scope.switchPlayer = function() {
-      $scope.playerMarker = gameService.switchPlayer($scope.winner, $scope.playerMarker);
+      $scope.currentPlayer === $scope.computerMarker ? $scope.currentPlayer = $scope.playerMarker : $scope.currentPlayer = $scope.computerMarker
     }
 
     $scope.resetBoard = function() {
-      $scope.board = gameService.gameBoard();  
+      $scope.board = gameService.gameBoard()      
     }
 
     $scope.setName = function(e) {
@@ -103,6 +119,51 @@ myControllers.controller('AIGame', ['$firebase', '$scope', 'gameService',
         $scope.playerName = $scope.name
     }
 
+    $scope.startGame = function() {
+      if ($scope.currentPlayer === "") {
+        $scope.currentPlayer = gameService.flipCoin();
+        alert("It's "+$scope.currentPlayer+"'s turn");
+        if ($scope.currentPlayer === $scope.computerMarker){
+          $scope.computerMove();
+          $scope.switchPlayer();
+        }
+      }
+      else {
+        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
+      }
+    }    
+
+    $scope.saveWin = function() {
+      ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
+    }
+
+    $scope.computerMove = function() {
+      $scope.takeMiddleifOpen();
+      $scope.blockOrWin();
+
+      // if ($scope.doubleThreatAvailable()){
+      //   $scope.createFlex();
+      // }
+      // else {
+      //   alert("Hey Fucker");
+      // }
+    }
+
+    // These are all happening - need to break these up so only run once
+    $scope.blockOrWin = function() {
+      $scope.board = gameService.blockorWinRow($scope.board, $scope.computerMarker)
+      $scope.board = gameService.blockorWinColumn($scope.board, $scope.computerMarker)
+      $scope.board = gameService.blockorWinDiagonal($scope.board, $scope.computerMarker)
+    }
+
+    $scope.takeMiddleifOpen = function() {
+      if ($scope.board[1][1].letter === "") { 
+        $scope.board[1][1].letter = $scope.computerMarker
+      }
+    }
+
+
   }])
 
 // ----------- HOSTED GAME ------------------//
+
