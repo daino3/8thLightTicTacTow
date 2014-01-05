@@ -57,10 +57,13 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
 
     $scope.computerMove = function() {
       if ($scope.middleIsOpen()) {
-        $scope.takeMiddle()
+        $scope.takeMiddle();
       }
       else if ($scope.someoneCanWin()) {
         $scope.blockOrWin();      
+      }
+      else if ($scope.canCreateFork) {
+        $scope.createFork();
       }
       else {
         $scope.playOppoCorner($scope.board, $scope.playerMarker, $scope.computerMarker);
@@ -107,6 +110,36 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
 
     $scope.middleIsOpen = function() {
       return ($scope.board[1][1].letter === "") ? true : false 
+    }
+
+    $scope.canCreateFork = function() {
+      if ($scope.board[1][1].letter !== $scope.computerMarker) {
+        return false
+      }
+      else if ($scope.playerHasACorner($scope.board, $scope.computerMarker)) {
+        if ($scope.adjacentCornerOpen) {
+
+        }
+      }
+
+    }
+
+    $scope.playerHasACorner = function(board, computerMarker) {
+      var corners = $scope.getCorners(board)
+      for (i = 0; i < corners.length; i++) {
+        if (corners[i] === $scope.computerMarker) {
+          return true
+        }
+      }
+    }
+
+    $scope.getCorners = function(board) {
+      var topleft  = board[0][0].letter
+      var topright = board[0][2].letter
+      var botleft  = board[2][0].letter
+      var botright = board[2][2].letter
+      var corners  = [topleft, topright, botleft, botright]
+      return corners
     }
 
     $scope.playOppoCorner = function(board, playerMarker, compMarker) {
