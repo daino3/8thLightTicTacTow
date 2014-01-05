@@ -3,7 +3,7 @@
 var aiGameCtrl = angular.module('controllers.aigame', ['services.game', 'services.ailogic'])
 
 aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicService',
-  function($firebase, $scope, gameService) {
+  function($firebase, $scope, gameService, ailogicService) {
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
@@ -13,6 +13,20 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     $scope.computerMarker = "O"
     $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
+
+    $scope.startGame = function() {
+      if ($scope.currentPlayer === "") {
+        $scope.currentPlayer = gameService.flipCoin();
+        alert("It's "+$scope.currentPlayer+"'s turn");
+        if ($scope.currentPlayer === $scope.computerMarker){
+          $scope.computerMove();
+          $scope.switchPlayer();
+        }
+      }
+      else {
+        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
+      }
+    }   
 
     $scope.takeSquare = function(box) {
       if ($scope.currentPlayer == "") {
@@ -41,6 +55,82 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       $scope.currentPlayer === $scope.computerMarker ? $scope.currentPlayer = $scope.playerMarker : $scope.currentPlayer = $scope.computerMarker
     }
 
+    $scope.computerMove = function() {
+      if ($scope.middleIsOpen()) {
+        $scope.takeMiddle()
+      }
+      else if ($scope.someoneCanWin()) {
+        $scope.blockOrWin();      
+      }
+      else {
+        $scope.playOppoCorner($scope.board, $scope.playerMarker, $scope.computerMarker);
+      }
+    }
+
+    $scope.blockOrWin = function() {
+      if ($scope.canWinViaRows()){
+        ailogicService.blockorWinRows($scope.board, $scope.computerMarker);
+      }
+      else if ($scope.canWinViaColumns()) {
+        ailogicService.blockorWinColumns($scope.board, $scope.computerMarker)
+      }
+      else if ($scope.canWinViaDiagonals()){
+        ailogicService.blockorWinDiagonals($scope.board, $scope.computerMarker)
+      }
+      else {
+        return false
+      }
+    }
+
+    $scope.someoneCanWin = function() {
+      if ( $scope.canWinViaRows() === true || $scope.canWinViaColumns() === true || $scope.canWinViaDiagonals() === true) {
+        return true
+      }
+      return false
+    }
+
+    $scope.canWinViaRows = function() {
+      return ailogicService.canWinViaRows($scope.board)
+    }
+
+    $scope.canWinViaColumns = function() {
+      return ailogicService.canWinViaColumns($scope.board)
+    }
+
+    $scope.canWinViaDiagonals = function() {
+      return ailogicService.canWinViaDiagonals($scope.board)
+    }
+
+    $scope.takeMiddle = function() {
+      $scope.board[1][1].letter = $scope.computerMarker
+    }
+
+    $scope.middleIsOpen = function() {
+      return ($scope.board[1][1].letter === "") ? true : false 
+    }
+
+    $scope.playOppoCorner = function(board, playerMarker, compMarker) {
+      var topleft  = board[0][0].letter
+      var topright = board[0][2].letter
+      var botleft  = board[2][0].letter
+      var botright = board[2][2].letter
+      if ((topleft === playerMarker) && (botright === "")) {
+        board[2][2].letter = compMarker
+      }
+      else if ((topright === playerMarker) && (botleft === "")) {
+        board[2][0].letter = compMarker
+      }
+      else if ((botleft === playerMarker) && (topright === "")) {
+        board[0][2].letter = compMarker
+      }
+      else if ((botright === playerMarker) && (topleft === "")) {
+        board[0][0].letter = compMarker
+      }
+      else {
+        return false
+      }
+    }
+
     $scope.resetBoard = function() {
       $scope.board = gameService.gameBoard()      
     }
@@ -50,60 +140,8 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         $scope.playerName = $scope.name
     }
 
-    $scope.startGame = function() {
-      if ($scope.currentPlayer === "") {
-        $scope.currentPlayer = gameService.flipCoin();
-        alert("It's "+$scope.currentPlayer+"'s turn");
-        if ($scope.currentPlayer === $scope.computerMarker){
-          $scope.computerMove();
-          $scope.switchPlayer();
-        }
-      }
-      else {
-        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
-      }
-    }    
-
     $scope.saveWin = function() {
       ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
-    }
-
-    $scope.computerMove = function() {
-      $scope.takeMiddleifOpen();
-      $scope.blockOrWin();
-
-      // if ($scope.doubleThreatAvailable()){
-      //   $scope.createFlex();
-      // }
-      // else {
-      //   alert("Hey Fucker");
-      // }
-    }
-
-    // if the game board returned is not the same as the original, set the game board equal to the board returned and break out of the loop
-    $scope.blockOrWin = function() {
-      var newBoardRows      = gameService.blockorWinRows($scope.board, $scope.computerMarker)
-      var newBoardColumns   = gameService.blockorWinColumns($scope.board, $scope.computerMarker)
-      var newBoardDiagonals = gameService.blockorWinDiagonals($scope.board, $scope.computerMarker)
-
-      if ($scope.board !== newBoardRows){
-        $scope.board = newBoardRows;
-      }
-      else if ($scope.board !== newBoardColumns) {
-        $scope.board = newBoardColumns;
-      }
-      else if ($scope.board !== newBoardColumns){
-        $scope.board = newBoardColumns;
-      }
-      else {
-        return false
-      }
-    }
-
-    $scope.takeMiddleifOpen = function() {
-      if ($scope.board[1][1].letter === "") { 
-        $scope.board[1][1].letter = $scope.computerMarker
-      }
     }
 
 }])

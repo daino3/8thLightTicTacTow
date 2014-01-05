@@ -5,9 +5,12 @@
 var myApp = angular.module('myApp', [
   'ngRoute',
   'filters',
-  'services',
   'directives',
-  'controllers',
+  'services.ailogic',
+  'services.game',
+  'controllers.localgame',
+  'controllers.aigame',
+  'controllers.welcome',
   'firebase'
 ])
 
