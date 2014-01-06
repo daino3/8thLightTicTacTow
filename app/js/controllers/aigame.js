@@ -2,20 +2,22 @@
 
 var aiGameCtrl = angular.module('controllers.aigame', ['services.game', 'services.ailogic'])
 
+var EMPTY = ""
+
 aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicService',
   function($firebase, $scope, gameService, ailogicService) {
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
-    $scope.playerName = ""
+    $scope.playerName = EMPTY
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
     $scope.playerMarker = "X"
     $scope.computerMarker = "O"
-    $scope.currentPlayer = ""
+    $scope.currentPlayer = EMPTY
     $scope.board = gameService.gameBoard()
 
     $scope.startGame = function() {
-      if ($scope.currentPlayer === "") {
+      if ($scope.currentPlayer === EMPTY) {
         $scope.currentPlayer = gameService.flipCoin();
         alert("It's "+$scope.currentPlayer+"'s turn");
         if ($scope.currentPlayer === $scope.computerMarker){
@@ -29,7 +31,7 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     }   
 
     $scope.takeSquare = function(box) {
-      if ($scope.currentPlayer == "") {
+      if ($scope.currentPlayer == EMPTY) {
         alert("You must flip the coin to determine who goes first")
       }
       else {
@@ -62,107 +64,57 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       else if ($scope.someoneCanWin()) {
         $scope.blockOrWin();      
       }
-      else if ($scope.canCreateFork) {
+      else if ($scope.canCreateFork()) {
         $scope.createFork();
       }
-      else {
-        $scope.playOppoCorner($scope.board, $scope.playerMarker, $scope.computerMarker);
+      else if ($scope.playerTookCorner()){
+        $scope.playOppoCorner();
       }
-    }
-
-    $scope.blockOrWin = function() {
-      if ($scope.canWinViaRows()){
-        ailogicService.blockorWinRows($scope.board, $scope.computerMarker);
-      }
-      else if ($scope.canWinViaColumns()) {
-        ailogicService.blockorWinColumns($scope.board, $scope.computerMarker)
-      }
-      else if ($scope.canWinViaDiagonals()){
-        ailogicService.blockorWinDiagonals($scope.board, $scope.computerMarker)
+      else if ($scope.cornersAreOpen()) {
+        $scope.takeACorner()
       }
       else {
-        return false
+        console.log("You gotta fix me, brother!!!")
       }
     }
 
-    $scope.someoneCanWin = function() {
-      if ( $scope.canWinViaRows() === true || $scope.canWinViaColumns() === true || $scope.canWinViaDiagonals() === true) {
-        return true
-      }
-      return false
-    }
+    //--------- TAKE MIDDLE IF OPEN -----------//
 
-    $scope.canWinViaRows = function() {
-      return ailogicService.canWinViaRows($scope.board)
-    }
-
-    $scope.canWinViaColumns = function() {
-      return ailogicService.canWinViaColumns($scope.board)
-    }
-
-    $scope.canWinViaDiagonals = function() {
-      return ailogicService.canWinViaDiagonals($scope.board)
+    $scope.middleIsOpen = function() {
+      return ($scope.board[1][1].letter === EMPTY) 
     }
 
     $scope.takeMiddle = function() {
       $scope.board[1][1].letter = $scope.computerMarker
     }
 
-    $scope.middleIsOpen = function() {
-      return ($scope.board[1][1].letter === "") ? true : false 
+    // -------- BLOCKING OR WINNING ---------- //
+
+    $scope.someoneCanWin = function() {
+      return ailogicService.someoneCanWin($scope.board)
     }
+
+    $scope.blockOrWin = function() {
+      ailogicService.blockOrWin($scope.board, $scope.computerMarker)
+    }
+
+    //----- FORK LOGIC ------//
 
     $scope.canCreateFork = function() {
-      if ($scope.board[1][1].letter !== $scope.computerMarker) {
-        return false
-      }
-      else if ($scope.playerHasACorner($scope.board, $scope.computerMarker)) {
-        if ($scope.adjacentCornerOpen) {
-
-        }
-      }
-
+      ailogicService.canCreateFork($scope.board, $scope.computerMarker)
     }
 
-    $scope.playerHasACorner = function(board, computerMarker) {
-      var corners = $scope.getCorners(board)
-      for (i = 0; i < corners.length; i++) {
-        if (corners[i] === $scope.computerMarker) {
-          return true
-        }
-      }
+    $scope.createFork = function() {
+      ailogicService.createFork($scope.board, $scope.computerMarker)
     }
 
-    $scope.getCorners = function(board) {
-      var topleft  = board[0][0].letter
-      var topright = board[0][2].letter
-      var botleft  = board[2][0].letter
-      var botright = board[2][2].letter
-      var corners  = [topleft, topright, botleft, botright]
-      return corners
+    //------------ Other CPU Moves ---------------//
+
+    $scope.playOppoCorner = function() {
+      ailogicService.playOppoCorner($scope.board, $scope.playerMarker, $scope.compMarker);
     }
 
-    $scope.playOppoCorner = function(board, playerMarker, compMarker) {
-      var topleft  = board[0][0].letter
-      var topright = board[0][2].letter
-      var botleft  = board[2][0].letter
-      var botright = board[2][2].letter
-      if ((topleft === playerMarker) && (botright === "")) {
-        board[2][2].letter = compMarker
-      }
-      else if ((topright === playerMarker) && (botleft === "")) {
-        board[2][0].letter = compMarker
-      }
-      else if ((botleft === playerMarker) && (topright === "")) {
-        board[0][2].letter = compMarker
-      }
-      else if ((botright === playerMarker) && (topleft === "")) {
-        board[0][0].letter = compMarker
-      }
-      else {
-        return false
-      }
-    }
+    //------------ Other Game Methods ---------------//
 
     $scope.resetBoard = function() {
       $scope.board = gameService.gameBoard()      
@@ -178,4 +130,3 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     }
 
 }])
-

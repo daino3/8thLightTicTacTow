@@ -4,15 +4,17 @@
 // In this case it is a simple value service.
 var gameServices = angular.module('services.game', []);
 
+var EMPTY = "";
+
 gameServices.factory('gameService', 
   function(){
     return {
 
       gameBoard: function() {
         var board = [
-          [{'id' : 'A1','letter': ''}, {'id' : 'A2','letter': ''}, {'id' : 'A3','letter': ''}],
-          [{'id' : 'B1','letter': ''}, {'id' : 'B2','letter': ''}, {'id' : 'B3','letter': ''}],
-          [{'id' : 'C1','letter': ''}, {'id' : 'C2','letter': ''}, {'id' : 'C3','letter': ''}]
+          [{'id' : 'A1','letter': EMPTY}, {'id' : 'A2','letter': EMPTY}, {'id' : 'A3','letter': EMPTY}],
+          [{'id' : 'B1','letter': EMPTY}, {'id' : 'B2','letter': EMPTY}, {'id' : 'B3','letter': EMPTY}],
+          [{'id' : 'C1','letter': EMPTY}, {'id' : 'C2','letter': EMPTY}, {'id' : 'C3','letter': EMPTY}]
         ]; 
         return board 
       },
@@ -108,7 +110,7 @@ gameServices.factory('gameService',
 
 Array.prototype.allSameValues = function() {
   for (var i = 1; i < this.length; i++) {
-    if (this[i] !== this[0] || this[0] === "") {
+    if (this[i] !== this[0] || this[0] === EMPTY) {
       return false; 
     }
   } 
