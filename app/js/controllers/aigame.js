@@ -9,12 +9,12 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
 
-    $scope.playerName = EMPTY
+    $scope.playerName = EMPTY;
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
-    $scope.playerMarker = "X"
-    $scope.computerMarker = "O"
-    $scope.currentPlayer = EMPTY
-    $scope.board = gameService.gameBoard()
+    $scope.playerMarker = "X";
+    $scope.computerMarker = "O";
+    $scope.currentPlayer = EMPTY;
+    $scope.board = gameService.gameBoard();
 
     $scope.startGame = function() {
       if ($scope.currentPlayer === EMPTY) {
@@ -26,20 +26,21 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         }
       }
       else {
-        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
+        alert("The game has already begun! It's "+ $scope.currentPlayer + "'s turn");
       }
     }   
 
     $scope.takeSquare = function(box) {
       if ($scope.currentPlayer == EMPTY) {
-        alert("You must flip the coin to determine who goes first")
+        alert("You must flip the coin to determine who goes first");
       }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
         $scope.winCheck();
         $scope.switchPlayer();
-        setTimeout(console.log("Computer's Turn"), 1000)
+        setTimeout(console.log("Computer's Turn"), 1000);
         $scope.computerMove();
+        setTimeout(console.log("Computer Went"), 1000);
         $scope.winCheck();
         $scope.switchPlayer();
       }
@@ -47,7 +48,7 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
 
     $scope.winCheck = function() {
       if (gameService.checkForWinner($scope.board) === true) {
-        alert($scope.currentPlayer + " has won!!")
+        alert($scope.currentPlayer + " has won!!");
         $scope.saveWin();
         $scope.resetBoard();
       }
@@ -58,66 +59,99 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     }
 
     $scope.computerMove = function() {
-      if ($scope.middleIsOpen()) {
-        $scope.takeMiddle();
-      }
-      else if ($scope.someoneCanWin()) {
+      // This logic must remain consistent
+      if ($scope.someoneCanWin()) {
+        console.log("Someone Could Win")
         $scope.blockOrWin();      
       }
-      else if ($scope.canCreateFork()) {
+      else if (console.log("Player Fork Check") + $scope.playerCanCreateFork()) {
+        console.log("Player Can Create a Fork")
+        $scope.blockFork();
+      }
+      else if (console.log("Computer Fork Check") + $scope.computerCanCreateFork()) {
+        console.log("Computer Can Create a Fork")
         $scope.createFork();
       }
       else if ($scope.playerTookCorner()){
+        console.log("Player Took a Corner")
         $scope.playOppoCorner();
       }
+      else if ($scope.middleIsOpen()) {
+        console.log("Took Middle")
+        $scope.takeMiddle();
+      }
       else if ($scope.cornersAreOpen()) {
-        $scope.takeACorner()
+        console.log("All Corners Are Open")
+        ailogicService.takeCorner($scope.board, $scope.computerMarker);
       }
       else {
-        console.log("You gotta fix me, brother!!!")
+        console.log("Take an Adjacent Corner")
+        $scope.playAdjacentCorner();
       }
     }
 
-    //--------- TAKE MIDDLE IF OPEN -----------//
+    //----------- TAKE MIDDLE IF OPEN ------------//
 
     $scope.middleIsOpen = function() {
-      return ($scope.board[1][1].letter === EMPTY) 
+      return ($scope.board[1][1].letter === EMPTY);
     }
 
     $scope.takeMiddle = function() {
-      $scope.board[1][1].letter = $scope.computerMarker
+      $scope.board[1][1].letter = $scope.computerMarker;
     }
 
-    // -------- BLOCKING OR WINNING ---------- //
+    // ------------- BLOCK OR WIN ---------------//
 
     $scope.someoneCanWin = function() {
-      return ailogicService.someoneCanWin($scope.board)
+      return ailogicService.someoneCanWin($scope.board);
     }
 
     $scope.blockOrWin = function() {
-      ailogicService.blockOrWin($scope.board, $scope.computerMarker)
+      ailogicService.blockOrWin($scope.board, $scope.computerMarker);
     }
 
-    //----- FORK LOGIC ------//
+    //------------- FORK LOGIC -----------------//
 
-    $scope.canCreateFork = function() {
-      ailogicService.canCreateFork($scope.board, $scope.computerMarker)
+    $scope.playerCanCreateFork = function() {
+      return ailogicService.canCreateFork($scope.board, $scope.playerMarker);
+    }
+
+    $scope.computerCanCreateFork = function() {
+      return ailogicService.canCreateFork($scope.board, $scope.computerMarker);
     }
 
     $scope.createFork = function() {
-      ailogicService.createFork($scope.board, $scope.computerMarker)
+      ailogicService.createFork($scope.board, $scope.computerMarker);
     }
 
-    //------------ Other CPU Moves ---------------//
+    $scope.blockFork = function() {
+      ailogicService.createFork($scope.board, $scope.computerMarker);
+    }    
+
+    //-------------- ADJACENT CORNER LOGIC ---------------//
+
+    $scope.playAdjacentCorner = function() {
+      ailogicService.playAdjacentCorner($scope.board, $scope.computerMarker);
+    }
+
+    //------------ OTHER CPU MOVES ---------------//
+
+    $scope.playerTookCorner = function() {
+      return ailogicService.playerTookCorner($scope.board, $scope.playerMarker);
+    }
 
     $scope.playOppoCorner = function() {
-      ailogicService.playOppoCorner($scope.board, $scope.playerMarker, $scope.compMarker);
+      ailogicService.playOppoCorner($scope.board, $scope.playerMarker, $scope.computerMarker);
     }
 
-    //------------ Other Game Methods ---------------//
+    $scope.cornersAreOpen = function() {
+      return ailogicService.cornersAreOpen($scope.board);
+    }
+
+    //------------ OTHER GAME METHODS ---------------//
 
     $scope.resetBoard = function() {
-      $scope.board = gameService.gameBoard()      
+      $scope.board = gameService.gameBoard();    
     }
 
     $scope.setName = function(e) {
