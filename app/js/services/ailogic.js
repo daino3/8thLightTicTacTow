@@ -220,6 +220,14 @@ ailogicServices.factory('ailogicService',
         return false;
       },
 
+      openCorner: function(board) {
+        var corners = this.getCorners(board);
+        for (var i = 0; i < corners.length; i++) {
+          if (corners[i] === EMPTY) {return true}
+        }
+        return false;
+      },
+
       playOppoCorner: function(board, playerMarker, compMarker) {
         var topleft  = board[0][0].letter;
         var topright = board[0][2].letter;
@@ -260,71 +268,6 @@ ailogicServices.factory('ailogicService',
       getCorners: function(board) {
         return [board[0][0].letter, board[0][2].letter, board[2][0].letter, board[2][2].letter];
       },
-
-      //------------------ PLAY ADJACENT CORNER ------------------//
-
-      playAdjacentCorner: function(board, compMarker) {
-        var topleft  = board[0][0].letter;
-        var topright = board[0][2].letter;
-        var botleft  = board[2][0].letter;
-        var botright = board[2][2].letter;
-        if (topleft === compMarker) {
-          this.checkright(board, [0,0], compMarker);
-          this.checkbelow(board, [0,0], compMarker);
-        }
-        else if (topright === compMarker) {
-          this.checkleft(board, [0,2], compMarker);
-          this.checkbelow(board, [0,2], compMarker);        
-        }
-        else if (botleft === compMarker) {
-          this.checkright(board, [2,0], compMarker);
-          this.checkabove(board, [2,0], compMarker);
-        }
-        else if (botright === compMarker) {
-          this.checkleft(board, [2,2], compMarker);
-          this.checkabove(board, [2,2], compMarker);
-        }
-        else {
-          return false;
-        }
-      },
-
-      checkleft: function(board, coordinates, compMarker) {
-        // using starting coordinates to navigate      
-        var row = coordinates[0];
-        var box = coordinates[1];
-        if ( board[row][box - 2] === EMPTY && board[row][box - 1] === EMPTY ) {
-          board[row][box - 2] = compMarker;
-        }
-      },
-
-      checkright: function(board, coordinates, compMarker) {
-        // using starting coordinates to navigate      
-        var row = coordinates[0];
-        var box = coordinates[1];
-        if ( board[row][box + 2] === EMPTY && board[row][box + 1] === EMPTY ) {
-          board[row][box + 2] = compMarker;
-        }
-      },
-
-      checkabove: function(board, coordinates, compMarker) {
-        // using starting coordinates to navigate      
-        var row = coordinates[0];
-        var box = coordinates[1];
-        if ( board[row - 2][box] === EMPTY && board[row - 1][box] === EMPTY ) {
-          board[row - 2][box] = compMarker;
-        }
-      },
-
-      checkbelow: function(board, coordinates, compMarker) {
-        // using starting coordinates to navigate      
-        var row = coordinates[0];
-        var box = coordinates[1];
-        if ( board[row + 2][box] === EMPTY && board[row + 1][box] === EMPTY ) {
-          board[row + 2][box] = compMarker;
-        }
-      },
-
 
     }
   }
