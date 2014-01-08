@@ -110,17 +110,36 @@ ailogicServices.factory('ailogicService',
       createFork: function(board, compMarker) {
         console.log("I'm HERE!!!");
         var that = this;
-        if (that.topForkOpportunity(board, marker)) {
+        if (that.topForkOpportunity(board, compMarker)) {
           that.createTopFork(board, compMarker);
         }
-        else if (that.leftForkOpportunity(board, marker)) {
-          that.createLeftFork(board, compMarker);
+        else if (that.rightForkOpportunity(board, compMarker)) {
+          that.createRightFork(board, compMarker);
         }
-        else if (that.bottomForkOpportunity(board, marker)) {
+        else if (that.bottomForkOpportunity(board, compMarker)) {
           that.createBottomFork(board, compMarker);
         }
-        else if (that.rightForkOpportunity(board, marker)) {
+        else if (that.leftForkOpportunity(board, compMarker)) {
+          that.createLeftFork(board, compMarker);
+        }
+        else {
+          console.log("Wrong!!!");  
+        }
+      },
+
+      blockFork: function(board, playerMarker, compMarker) {
+        var that = this;
+        if (that.topForkOpportunity(board, playerMarker)) {
+          that.createTopFork(board, compMarker);
+        }
+        else if (that.rightForkOpportunity(board, playerMarker)) {
           that.createRightFork(board, compMarker);
+        }
+        else if (that.bottomForkOpportunity(board, playerMarker)) {
+          that.createBottomFork(board, compMarker);
+        }
+        else if (that.leftForkOpportunity(board, playerMarker)) {
+          that.createLeftFork(board, compMarker);
         }
         else {
           console.log("Wrong!!!");  
@@ -130,34 +149,13 @@ ailogicServices.factory('ailogicService',
       canCreateFork: function(board, marker) {
         var opportunity = false;
         var middle = board[1][1].letter;
-        middle === marker ? true : return false;
-        console.log("----Left----")
-        this.leftForkOpportunity(board, marker) === true ? false : opportunity = true;
-        console.log("----Top----")
-        this.topForkOpportunity(board, marker) === true ? false : opportunity = true;
-        console.log("----Right----")
-        this.rightForkOpportunity(board, marker) === true ? false : opportunity = true;
-        console.log("----Bottom----")
-        this.bottomForkOpportunity(board, marker) === true ? false : opportunity = true;
-        console.log("-----Total-------")
-        console.log(opportunity)
-        console.log("------------")
-        console.log("")
+        if (middle === marker) {
+          this.leftForkOpportunity(board, marker) === true ? opportunity = true : false;
+          this.topForkOpportunity(board, marker) === true ? opportunity = true : false;
+          this.rightForkOpportunity(board, marker) === true ? opportunity = true : false;
+          this.bottomForkOpportunity(board, marker) === true ? opportunity = true : false;
+        }
         return opportunity
-      },
-
-      leftForkOpportunity: function(board, marker) {
-        var opportunity = true;
-        (board[0][0].letter === marker || board[2][0].letter === marker) === false ? opportunity = false : true; // a left corner square belongs to the computer / player 
-        (board[1][0].letter === EMPTY) === false ? opportunity = false : true; // middle left is open  
-        (board[0][2].letter === EMPTY || board[2][2].letter === EMPTY) === false ? opportunity = false : true; // either right corners are open
-        console.log(opportunity)
-        return opportunity;
-      },
-
-      createLeftFork: function(board, compMarker) {
-        if (board[0][0] === EMPTY) {board[0][0] = compMarker}
-        if (board[2][0] === EMPTY) {board[2][0] = compMarker}
       },
 
       topForkOpportunity: function(board, marker) {
@@ -165,13 +163,12 @@ ailogicServices.factory('ailogicService',
         (board[0][0].letter === marker || board[0][2].letter === marker) === false ? opportunity = false : true; // a top corner square belongs to the computer / player
         (board[0][1].letter === EMPTY) === false ? opportunity = false : true; // middle top is open
         (board[2][0].letter === EMPTY || board[2][2].letter === EMPTY) ===  false ? opportunity = false : true; // either bottom corners are open
-        console.log(opportunity)
         return opportunity;
       },
 
       createTopFork: function(board, compMarker) {
-        if (board[0][0] === EMPTY) {board[0][0] = compMarker}
-        if (board[0][2] === EMPTY) {board[0][2] = compMarker}
+        if (board[0][0].letter === EMPTY) {board[0][0].letter = compMarker;}
+        if (board[0][2].letter === EMPTY) {board[0][2].letter = compMarker;}
       },
 
       rightForkOpportunity: function(board, marker) {
@@ -179,13 +176,12 @@ ailogicServices.factory('ailogicService',
         (board[0][2].letter === marker || board[2][2].letter === marker) === false ? opportunity = false : true; // a right corner already belongs to computer 
         (board[1][2].letter === EMPTY) === false ? opportunity = false : true; // middle bottom is open
         (board[0][0].letter === EMPTY || board[0][2].letter === EMPTY) === false ? opportunity = false : true; // either top corners are open
-        console.log(opportunity)
         return opportunity;
       },
 
       createRightFork: function(board, compMarker) {
-        if (board[2][0] === EMPTY) {board[2][0] = compMarker}
-        if (board[2][2] === EMPTY) {board[2][2] = compMarker}
+        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
+        if (board[2][2].letter === EMPTY) {board[2][2].letter = compMarker}
       },
 
       bottomForkOpportunity: function(board, marker) {
@@ -193,15 +189,26 @@ ailogicServices.factory('ailogicService',
         (board[2][0].letter === marker || board[2][2].letter === marker) === false ? opportunity = false : true; // a bottom corner already belongs to computer / player
         (board[2][0].letter === EMPTY) === false ? opportunity = false : true; // middle bottom is open
         (board[0][0].letter === EMPTY || board[0][2].letter === EMPTY) === false ? opportunity = false : true; // either top corners are open
-        console.log(opportunity)
         return opportunity;
       },
 
       createBottomFork: function(board, compMarker) {
-        if (board[2][0] === EMPTY) {board[2][0] = compMarker}
-        if (board[2][2] === EMPTY) {board[2][2] = compMarker}
+        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
+        if (board[2][2].letter === EMPTY) {board[2][2].letter = compMarker}
       },
 
+      leftForkOpportunity: function(board, marker) {
+        var opportunity = true;
+        (board[0][0].letter === marker || board[2][0].letter === marker) === false ? opportunity = false : true; // a left corner square belongs to the computer / player 
+        (board[1][0].letter === EMPTY) === false ? opportunity = false : true; // middle left is open  
+        (board[0][2].letter === EMPTY || board[2][2].letter === EMPTY) === false ? opportunity = false : true; // either right corners are open
+        return opportunity;
+      },
+
+      createLeftFork: function(board, compMarker) {
+        if (board[0][0].letter === EMPTY) {board[0][0].letter = compMarker}
+        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
+      },
 
       //------------------ Play Opposite Corner if Player Takes a Corner ------------------//
 

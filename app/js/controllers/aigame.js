@@ -64,11 +64,11 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         console.log("Someone Could Win")
         $scope.blockOrWin();      
       }
-      else if (console.log("Player Fork Check") + $scope.playerCanCreateFork()) {
+      else if ($scope.playerCanCreateFork()) {
         console.log("Player Can Create a Fork")
         $scope.blockFork();
       }
-      else if (console.log("Computer Fork Check") + $scope.computerCanCreateFork()) {
+      else if ($scope.computerCanCreateFork()) {
         console.log("Computer Can Create a Fork")
         $scope.createFork();
       }
@@ -116,6 +116,10 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       return ailogicService.canCreateFork($scope.board, $scope.playerMarker);
     }
 
+    $scope.blockFork = function() {
+      ailogicService.blockFork($scope.board, $scope.playerMarker, $scope.computerMarker);
+    }
+
     $scope.computerCanCreateFork = function() {
       return ailogicService.canCreateFork($scope.board, $scope.computerMarker);
     }
@@ -123,10 +127,6 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     $scope.createFork = function() {
       ailogicService.createFork($scope.board, $scope.computerMarker);
     }
-
-    $scope.blockFork = function() {
-      ailogicService.createFork($scope.board, $scope.computerMarker);
-    }    
 
     //-------------- ADJACENT CORNER LOGIC ---------------//
 
