@@ -220,6 +220,14 @@ ailogicServices.factory('ailogicService',
         return false;
       },
 
+      openCorner: function(board) {
+        var corners = this.getCorners(board);
+        for (var i = 0; i < corners.length; i++) {
+          if (corners[i] === EMPTY) {return true}
+        }
+        return false;
+      },
+
       playOppoCorner: function(board, playerMarker, compMarker) {
         var topleft  = board[0][0].letter;
         var topright = board[0][2].letter;
@@ -287,6 +295,13 @@ ailogicServices.factory('ailogicService',
         else {
           return false;
         }
+      },
+
+      adjacentCornerOpen: function(board, marker) {
+        var topleft  = board[0][0].letter;
+        var topright = board[0][2].letter;
+        var botleft  = board[2][0].letter;
+        var botright = board[2][2].letter;
       },
 
       checkleft: function(board, coordinates, compMarker) {

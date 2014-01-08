@@ -20,15 +20,10 @@ gameServices.factory('gameService',
       },
 
       takeSquare: function(box, currentPlayer) {
-        if (!box.letter) {
-          box.letter = currentPlayer;
-        }
-        else {
-          alert('select an open square!!');
-        }
+        box.letter = currentPlayer;
       },
 
-      checkForWinner: function(board) {
+      winner: function(board) {
         if (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)){
           return true
         }
@@ -100,6 +95,17 @@ gameServices.factory('gameService',
       flipCoin: function() {
         var coin = Math.floor(Math.random() * 2);
         return (coin === 0) ? "O" : "X";
+      },
+
+      //------------- Board Full ------------//
+
+      boardFull: function(board) {
+        for (var row = 0; row < board.length; row++) {
+          for (var i = 0; i < board.length; i++) {
+            if (board[row][i].letter === EMPTY) {return false}
+          }
+        }
+        return true
       },
 
     }

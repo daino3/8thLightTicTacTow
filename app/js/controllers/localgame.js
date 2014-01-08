@@ -16,6 +16,9 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
       if ($scope.currentPlayer == "") {
         alert("You must flip the coin to determine who goes first")
       }
+      else if (box.letter === $scope.playerMarker || box.letter === $scope.computerMarker) {
+        alert("Select an open square!!")
+      }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
         $scope.winCheck();
@@ -23,9 +26,14 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
     }
 
     $scope.winCheck = function() {
-      if (gameService.checkForWinner($scope.board) === true) {
+      if (gameService.winner($scope.board)) {
         alert($scope.currentPlayer + " has won!!")
         $scope.saveWin();
+        $scope.resetBoard();
+      }
+      else if (gameService.boardFull($scope.board)) {
+        alert("Game is a tie")
+        $scope.tieGame()
         $scope.resetBoard();
       }
       else {
@@ -39,6 +47,10 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
 
     $scope.resetBoard = function() {
       $scope.board = gameService.gameBoard()      
+    }
+
+    $scope.tieGame = function() {
+      $scope.playerRecord.ties += 1
     }
 
     $scope.setName = function(e) {

@@ -31,8 +31,11 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     }   
 
     $scope.takeSquare = function(box) {
-      if ($scope.currentPlayer == EMPTY) {
+      if ($scope.currentPlayer === EMPTY) {
         alert("You must flip the coin to determine who goes first");
+      }
+      else if (box.letter === $scope.playerMarker || box.letter === $scope.computerMarker) {
+        alert("Select an open square!!!");
       }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
@@ -40,18 +43,27 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         $scope.switchPlayer();
         setTimeout(console.log("Computer's Turn"), 1000);
         $scope.computerMove();
-        setTimeout(console.log("Computer Went"), 1000);
+        setTimeout(console.log("Computer Went"), 5000);
         $scope.winCheck();
         $scope.switchPlayer();
       }
     }
 
     $scope.winCheck = function() {
-      if (gameService.checkForWinner($scope.board) === true) {
-        alert($scope.currentPlayer + " has won!!");
+      if (gameService.winner($scope.board)) {
         $scope.saveWin();
+        alert($scope.currentPlayer + " has won!!");
         $scope.resetBoard();
       }
+      else if (gameService.boardFull($scope.board)) {
+        $scope.tieGame();
+        alert("Game tied");
+        $scope.resetBoard();
+      }
+    }
+
+    $scope.tieGame = function() {
+      $scope.playerRecord.ties += 1
     }
 
     $scope.switchPlayer = function() {
@@ -62,7 +74,7 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       // This logic must remain consistent
       if ($scope.someoneCanWin()) {
         console.log("Someone Could Win")
-        $scope.blockOrWin();      
+        $scope.blockOrWin();
       }
       else if ($scope.playerCanCreateFork()) {
         console.log("Player Can Create a Fork")
@@ -72,10 +84,6 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         console.log("Computer Can Create a Fork")
         $scope.createFork();
       }
-      else if ($scope.playerTookCorner()){
-        console.log("Player Took a Corner")
-        $scope.playOppoCorner();
-      }
       else if ($scope.middleIsOpen()) {
         console.log("Took Middle")
         $scope.takeMiddle();
@@ -84,10 +92,54 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
         console.log("All Corners Are Open")
         ailogicService.takeCorner($scope.board, $scope.computerMarker);
       }
-      else {
-        console.log("Take an Adjacent Corner")
-        $scope.playAdjacentCorner();
+      else if ($scope.trapped($scope.board, $scope.playerMarker, $scope.computerMarker)) {
+        console.log("trapped")
+        $scope.takeMiddleSide($scope.board, $scope.computerMarker)
       }
+      else if ($scope.openCorner() && $scope.playerTookCorner()){
+        console.log("Player Took a Corner")
+        $scope.playOppoCorner();
+      }
+      else {
+        console.log("No Other Move")
+        $scope.takeEmptySquare($scope.board, $scope.computerMarker)
+      }
+    }
+
+    //----------- TRAPPED ------------//
+
+    $scope.trapped = function(board, playerMarker, compMarker) {
+      var middle   = board[1][1].letter
+      var topleft  = board[0][0].letter
+      var topright = board[0][2].letter
+      var botleft  = board[2][0].letter
+      var botright = board[2][2].letter
+
+      if (topleft === playerMarker && botright === playerMarker && middle === compMarker) {
+        return true
+      }
+      else if (botleft === playerMarker && topright === playerMarker && middle === compMarker) {
+        return true
+      }
+      return false
+    }
+
+    $scope.takeMiddleSide = function(board, compMarker) {
+      board[1][0].letter = compMarker
+    }
+
+    $scope.takeEmptySquare = function(board, compMarker) {
+      for (var row = 0; row < board.length; row++) {
+        for (var i = 0; i < board.length; i++) {
+          if (board[row][i].letter === EMPTY) {
+            board[row][i].letter = compMarker
+          }
+        }
+      }
+    }
+
+    $scope.openCorner = function() {
+      return ailogicService.openCorner($scope.board)      
     }
 
     //----------- TAKE MIDDLE IF OPEN ------------//
@@ -130,9 +182,9 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
 
     //-------------- ADJACENT CORNER LOGIC ---------------//
 
-    $scope.playAdjacentCorner = function() {
-      ailogicService.playAdjacentCorner($scope.board, $scope.computerMarker);
-    }
+    // $scope.playAdjacentCorner = function() {
+    //   ailogicService.playAdjacentCorner($scope.board, $scope.computerMarker);
+    // }
 
     //------------ OTHER CPU MOVES ---------------//
 
