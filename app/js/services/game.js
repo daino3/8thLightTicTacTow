@@ -5,6 +5,8 @@
 var gameServices = angular.module('services.game', []);
 
 var EMPTY = "";
+var PLAYER1 = "X";
+var PLAYER2 = "O"
 
 gameServices.factory('gameService', 
   function(){
@@ -90,13 +92,6 @@ gameServices.factory('gameService',
         return diagonals
       },
 
-      //------------- Other ------------//
-
-      flipCoin: function() {
-        var coin = Math.floor(Math.random() * 2);
-        return (coin === 0) ? "O" : "X";
-      },
-
       //------------- Board Full ------------//
 
       boardFull: function(board) {
@@ -108,6 +103,12 @@ gameServices.factory('gameService',
         return true
       },
 
+      //------------- Other ------------//
+
+      flipCoin: function() {
+        var coin = Math.floor(Math.random() * 2);
+        return (coin === 0) ? PLAYER2 : PLAYER1;
+      },
     }
   }
 );
@@ -123,20 +124,7 @@ Array.prototype.allSameValues = function() {
   return true;
 }
 
-Array.prototype.hasTwoSameValues = function(val1, val2) {
-  var val1counter = 0
-  var val2counter = 0
-  for (var i = 0; i < this.length; i++) {
-    if (this[i] === val1) {val1counter += 1}
-    if (this[i] === val2) {val2counter += 1}
-  }
-  return (val1counter === 2 || val2counter === 2) ? true : false
-}
-
-Array.prototype.hasEmptyBox = function() {
-  var empty = false
-  for(var i = 0; i < this.length; i++) {
-    if (this[i] === "") {empty = true}
-  }
-  return empty
+Array.prototype.hasNumValues = function(val, num) {
+  var values = this.filter(function(e) {return e === val}).length
+  return values === num ? true : false
 }

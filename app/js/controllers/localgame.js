@@ -2,13 +2,16 @@
 
 var localGame = angular.module('controllers.localgame', ['services.game'])
 
+var PLAYER = "X"
+var OPPONENT = "O"
+
 localGame.controller('LocalGame', ['$scope', 'gameService',
   function($scope, gameService) {
     
     $scope.playerName = ""
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
-    $scope.playerMarker = "X"
-    $scope.opponentMarker = "O"
+    $scope.playerMarker = PLAYER
+    $scope.opponentMarker = OPPONENT
     $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
 
@@ -16,7 +19,7 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
       if ($scope.currentPlayer == "") {
         alert("You must flip the coin to determine who goes first")
       }
-      else if (box.letter === $scope.playerMarker || box.letter === $scope.computerMarker) {
+      else if (box.letter !== EMPTY) {
         alert("Select an open square!!")
       }
       else {

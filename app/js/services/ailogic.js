@@ -2,13 +2,49 @@
 
 // Demonstrate how to register services
 // In this case it is a simple value service.
-var ailogicServices = angular.module('services.ailogic', ['services.game']);
 
 var EMPTY = ""
+var PLAYER = "X"
+var COMPUTER = "O"
+
+var ailogicServices = angular.module('services.ailogic', ['services.game']);
 
 ailogicServices.factory('ailogicService', 
   function(gameService){
     return {
+
+      //-------------- Computer Logic -------------//
+
+      computerMove: function(board, player, cpu) {
+        // This logic must remain consistent
+        if (this.someoneCanWin(board)) {
+          this.blockOrWin(board, cpu);
+        }
+        else if (this.canCreateFork(board, player)) {
+          this.createOrBlockFork(board, player, cpu);
+        }
+        else if (this.canCreateFork(board, cpu)) {
+          this.createOrBlockFork(board, cpu, cpu);
+        }
+        else if (this.middleIsOpen(board)) {
+          this.takeMiddle(board, cpu);
+        }
+        else if (this.cornersAreOpen(board)) {
+          this.takeCorner(board, cpu);
+        }
+        else if (this.trapped(board, player, cpu)) {
+          this.takeMiddleSide()
+        }
+        else if (this.playerTookCornerandOppoCornerFree(board, player)){
+          this.playOppoCorner(board, player, cpu);
+        }
+        else if (this.canGetTwoInaRow(board, cpu)) {
+          this.getTwo(board, cpu);
+        }
+        else {
+          this.takeEmptySquare(board, cpu)
+        }
+      },
 
       //------------- BLOCK OR WIN -------------//
 
@@ -19,15 +55,15 @@ ailogicServices.factory('ailogicService',
         return false;
       },
 
-      blockOrWin: function(board, compMarker) {
+      blockOrWin: function(board, cpu) {
         if (this.canWinViaRows(board)){
-          this.blockorWinRows(board, compMarker);
+          this.blockorWinRows(board, cpu);
         }
         else if (this.canWinViaColumns(board)) {
-          this.blockorWinColumns(board, compMarker);
+          this.blockorWinColumns(board, cpu);
         }
         else if (this.canWinViaDiagonals(board)){
-          this.blockorWinDiagonals(board, compMarker);
+          this.blockorWinDiagonals(board, cpu);
         }
         else {
           return false;
@@ -39,19 +75,19 @@ ailogicServices.factory('ailogicService',
       canWinViaRows: function(board) {
         var rows = gameService.groupRows(board);
         for (var index = 0; index < rows.length; index++) {
-          if (rows[index].hasTwoSameValues("X", 'O') && rows[index].hasEmptyBox()) {
+          if (this.canWin(rows[index])) {
             return true;
           }
         }
         return false;
       },
 
-      blockorWinRows: function(board, compMarker) {
-       var rows = gameService.groupRows(board);
-        for (var index = 0; index < board.length; index++) {
-          if (rows[index].hasTwoSameValues("X", 'O') && rows[index].hasEmptyBox()) {
+      blockorWinRows: function(board, cpu) {
+        var rows = gameService.groupRows(board);
+        for (var index = 0; index < rows.length; index++) {
+          if (this.canWin(rows[index])) {
             var boxNum = rows[index].indexOf(EMPTY);
-            board[index][boxNum].letter = compMarker;
+            board[index][boxNum].letter = cpu;
           }
         }
       },
@@ -61,19 +97,19 @@ ailogicServices.factory('ailogicService',
       canWinViaColumns: function(board) {
         var columns = gameService.groupColumns(board);
         for (var index = 0; index < columns.length; index++) {
-          if (columns[index].hasTwoSameValues("X", 'O') && columns[index].hasEmptyBox()) {
+          if (this.canWin(columns[index])) {
             return true;
           }
         }
         return false;
       },
 
-      blockorWinColumns: function(board, compMarker) {
+      blockorWinColumns: function(board, cpu) {
         var columns = gameService.groupColumns(board);
         for (var index = 0; index < columns.length; index++) {
-          if (columns[index].hasTwoSameValues("X", 'O') && columns[index].hasEmptyBox()) {
+          if (this.canWin(columns[index])) {
             var rowNum = columns[index].indexOf(EMPTY);
-            board[rowNum][index].letter = compMarker;
+            board[rowNum][index].letter = cpu;
           }
         }
       },
@@ -83,171 +119,328 @@ ailogicServices.factory('ailogicService',
       canWinViaDiagonals: function(board) {
         var diagonals = gameService.groupDiagonals(board);
         for (var index = 0; index < diagonals.length; index++) {
-          if (diagonals[index].hasTwoSameValues("X", 'O') && diagonals[index].hasEmptyBox()) {
+          if (this.canWin(diagonals[index])) {
             return true;
           }
         }
         return false;
       },
 
-      blockorWinDiagonals: function(board, compMarker) {
+      blockorWinDiagonals: function(board, cpu) {
         var diagonals = gameService.groupDiagonals(board);
-        if (diagonals[0].hasTwoSameValues("X", "O") && diagonals[0].hasEmptyBox()) {
+        if (this.canWin(diagonals[0])) {
           var index = diagonals[0].indexOf(EMPTY);
-          board[index][index].letter = compMarker; //topBottom ([0,0]->[2,2] have same number)
+          board[index][index].letter = cpu; //topBottom ([0,0]->[2,2] have same number)
         }
-        else if (diagonals[1].hasTwoSameValues("X", "O") && diagonals[1].hasEmptyBox()){
+        else if (this.canWin(diagonals[1])){
           var index = diagonals[1].indexOf(EMPTY);
-          board[2 - index][index].letter = compMarker; // //bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
+          board[2 - index][index].letter = cpu; // //bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
         }
         else {
           return false;
         }
+      },
+
+      canWin: function(group) {
+        if ((group.hasNumValues(PLAYER, 2) || group.hasNumValues(COMPUTER, 2)) && group.hasNumValues(EMPTY, 1)) {
+          return true
+        }
+        return false
+      },
+
+      //------------------ TRAPPED --------------------//
+
+      trapped: function(board, player, cpu) {
+        var middle   = board[1][1].letter
+        var topleft  = board[0][0].letter
+        var topright = board[0][2].letter
+        var botleft  = board[2][0].letter
+        var botright = board[2][2].letter
+
+        if (topleft === player && botright === player && middle === cpu) {
+          return true
+        }
+        else if (botleft === player && topright === player && middle === cpu) {
+          return true
+        }
+        return false
+      },
+
+      takeMiddleSide: function(board, cpu) {
+        board[1][0].letter = cpu
+      },
+
+      //------------------ TAKE MIDDLE IF OPEN ------------------//
+
+      middleIsOpen: function(board) {
+        return board[1][1].letter === EMPTY;
+      },
+
+      takeMiddle: function(board, cpu) {
+        board[1][1].letter = cpu;
       },
 
       //------------------ CREATING A 'FORK' ------------------//
 
-      createFork: function(board, compMarker) {
-        console.log("I'm HERE!!!");
-        var that = this;
-        if (that.topForkOpportunity(board, compMarker)) {
-          that.createTopFork(board, compMarker);
-        }
-        else if (that.rightForkOpportunity(board, compMarker)) {
-          that.createRightFork(board, compMarker);
-        }
-        else if (that.bottomForkOpportunity(board, compMarker)) {
-          that.createBottomFork(board, compMarker);
-        }
-        else if (that.leftForkOpportunity(board, compMarker)) {
-          that.createLeftFork(board, compMarker);
-        }
-        else {
-          console.log("Wrong!!!");  
-        }
-      },
-
-      blockFork: function(board, playerMarker, compMarker) {
-        var that = this;
-        if (that.topForkOpportunity(board, playerMarker)) {
-          that.createTopFork(board, compMarker);
-        }
-        else if (that.rightForkOpportunity(board, playerMarker)) {
-          that.createRightFork(board, compMarker);
-        }
-        else if (that.bottomForkOpportunity(board, playerMarker)) {
-          that.createBottomFork(board, compMarker);
-        }
-        else if (that.leftForkOpportunity(board, playerMarker)) {
-          that.createLeftFork(board, compMarker);
-        }
-        else {
-          console.log("Wrong!!!");  
-        }
-      },
-
       canCreateFork: function(board, marker) {
-        var opportunity = false;
-        var middle = board[1][1].letter;
-        if (middle === marker) {
-          this.leftForkOpportunity(board, marker) === true ? opportunity = true : false;
-          this.topForkOpportunity(board, marker) === true ? opportunity = true : false;
-          this.rightForkOpportunity(board, marker) === true ? opportunity = true : false;
-          this.bottomForkOpportunity(board, marker) === true ? opportunity = true : false;
+        var topleft    = board[0][0].letter
+        var topmiddle  = board[0][1].letter
+        var topright   = board[0][2].letter
+        var midleft    = board[1][0].letter
+        var middle     = board[1][1].letter
+        var midright   = board[1][2].letter
+        var botleft    = board[2][0].letter
+        var botmiddle  = board[2][1].letter
+        var botright   = board[2][2].letter
+
+        if (middle !== marker) {
+          return false
         }
-        return opportunity
-      },
-
-      topForkOpportunity: function(board, marker) {
-        var opportunity = true;
-        (board[0][0].letter === marker || board[0][2].letter === marker) === false ? opportunity = false : true; // a top corner square belongs to the computer / player
-        (board[0][1].letter === EMPTY) === false ? opportunity = false : true; // middle top is open
-        (board[2][0].letter === EMPTY || board[2][2].letter === EMPTY) ===  false ? opportunity = false : true; // either bottom corners are open
-        return opportunity;
-      },
-
-      createTopFork: function(board, compMarker) {
-        if (board[0][0].letter === EMPTY) {board[0][0].letter = compMarker;}
-        if (board[0][2].letter === EMPTY) {board[0][2].letter = compMarker;}
-      },
-
-      rightForkOpportunity: function(board, marker) {
-        var opportunity = true;
-        (board[0][2].letter === marker || board[2][2].letter === marker) === false ? opportunity = false : true; // a right corner already belongs to computer 
-        (board[1][2].letter === EMPTY) === false ? opportunity = false : true; // middle bottom is open
-        (board[0][0].letter === EMPTY || board[0][2].letter === EMPTY) === false ? opportunity = false : true; // either top corners are open
-        return opportunity;
-      },
-
-      createRightFork: function(board, compMarker) {
-        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
-        if (board[2][2].letter === EMPTY) {board[2][2].letter = compMarker}
-      },
-
-      bottomForkOpportunity: function(board, marker) {
-        var opportunity = true;
-        (board[2][0].letter === marker || board[2][2].letter === marker) === false ? opportunity = false : true; // a bottom corner already belongs to computer / player
-        (board[2][0].letter === EMPTY) === false ? opportunity = false : true; // middle bottom is open
-        (board[0][0].letter === EMPTY || board[0][2].letter === EMPTY) === false ? opportunity = false : true; // either top corners are open
-        return opportunity;
-      },
-
-      createBottomFork: function(board, compMarker) {
-        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
-        if (board[2][2].letter === EMPTY) {board[2][2].letter = compMarker}
-      },
-
-      leftForkOpportunity: function(board, marker) {
-        var opportunity = true;
-        (board[0][0].letter === marker || board[2][0].letter === marker) === false ? opportunity = false : true; // a left corner square belongs to the computer / player 
-        (board[1][0].letter === EMPTY) === false ? opportunity = false : true; // middle left is open  
-        (board[0][2].letter === EMPTY || board[2][2].letter === EMPTY) === false ? opportunity = false : true; // either right corners are open
-        return opportunity;
-      },
-
-      createLeftFork: function(board, compMarker) {
-        if (board[0][0].letter === EMPTY) {board[0][0].letter = compMarker}
-        if (board[2][0].letter === EMPTY) {board[2][0].letter = compMarker}
-      },
-
-      //------------------ Play Opposite Corner if Player Takes a Corner ------------------//
-
-      playerTookCorner: function(board, playerMarker) {
-        var corners = this.getCorners(board);
-        for (var i = 0; i < corners.length; i++) {
-          if (corners[i] === playerMarker) {return true}
+        else if (topleft === marker) {
+          if (this.allEmpty([topmiddle, topright, botleft])) {
+            return true
+          }
+          else if (this.allEmpty([midleft, botleft, topright])) {
+            return true
+          }
+          else {
+            return false
+          }
         }
-        return false;
-      },
-
-      openCorner: function(board) {
-        var corners = this.getCorners(board);
-        for (var i = 0; i < corners.length; i++) {
-          if (corners[i] === EMPTY) {return true}
+        else if (topright === marker) {
+          if (this.allEmpty([topleft, topmiddle, botright])) {
+            return true
+          }
+          else if (this.allEmpty([botright, midright, topleft])) {
+            return true
+          }
+          else {
+            return false
+          }
         }
-        return false;
-      },
-
-      playOppoCorner: function(board, playerMarker, compMarker) {
-        var topleft  = board[0][0].letter;
-        var topright = board[0][2].letter;
-        var botleft  = board[2][0].letter;
-        var botright = board[2][2].letter;
-
-        if (topleft === playerMarker && botright === EMPTY) {
-          board[2][2].letter = compMarker;
+        else if (botright === marker) {
+          if (this.allEmpty([topright, midright, botleft])) {
+            return true
+          }
+          else if (this.allEmpty([botleft, botmiddle, topright])) {
+            return true
+          }
+          else {
+            return false
+          }
         }
-        else if (topright === playerMarker && botleft === EMPTY) {
-          board[2][0].letter = compMarker;
-        }
-        else if (botleft === playerMarker && topright === EMPTY) {
-          board[0][2].letter = compMarker;
-        }
-        else if (botright === playerMarker && topleft === EMPTY) {
-          board[0][0].letter = compMarker;
+        else if (botleft === marker) {
+          if (this.allEmpty([botright, botmiddle, topleft])) {
+            return true
+          }
+          else if (this.allEmpty([topleft, midleft, botright])) {
+            return true
+          }
+          else {
+            return false
+          }
         }
         else {
-          return false;
+          return false
+        }
+      },
+
+      createOrBlockFork: function(board, marker1, marker2) {
+        var topleft    = board[0][0].letter
+        var topmiddle  = board[0][1].letter
+        var topright   = board[0][2].letter
+        var midleft    = board[1][0].letter
+        var middle     = board[1][1].letter
+        var midright   = board[1][2].letter
+        var botleft    = board[2][0].letter
+        var botmiddle  = board[2][1].letter
+        var botright   = board[2][2].letter
+
+        if (middle !== marker1) {
+          return false
+        }
+        else if (topleft === marker1) {
+          if (this.allEmpty([topmiddle, topright, botleft])) {
+            this.takeTopRightCorner(board, marker2) 
+          }
+          else if (this.allEmpty([midleft, botleft, topright])) {
+            this.takeBotLeftCorner(board, marker2)
+          }
+          else {
+            return false
+          }
+        }
+        else if (topright === marker1) {
+          if (this.allEmpty([topleft, topmiddle, botright])) {
+            this.takeTopLeftCorner(board, marker2)
+          }
+          else if (this.allEmpty([botright, midright, topleft])) {
+            this.takeBotRightCorner(board, marker2)
+          }
+          else {
+            return false
+          }
+        }
+        else if (botright === marker1) {
+          if (this.allEmpty([topright, midright, botleft])) {
+            this.takeTopRightCorner(board, marker2)
+          }
+          else if (this.allEmpty([botleft, botmiddle, topright])) {
+            this.takeBotLeftCorner(board, marker2)
+          }
+          else {
+            return false
+          }
+        }
+        else if (botleft === marker1) {
+          if (this.allEmpty([botright, botmiddle, topleft])) {
+            this.takeBotRightCorner(board, marker2)
+          }
+          else if (this.allEmpty([topleft, midleft, botright])) {
+            this.takeTopLeftCorner(board, marker2)
+          }
+          else {
+            return false
+          }
+        }
+        else {
+          return false
+        }
+      },
+
+      takeTopLeftCorner: function(board, marker) {
+        board[0][0].letter = marker;
+      },
+
+      takeTopRightCorner: function(board, marker) {
+        board[0][2].letter = marker;
+      },
+
+      takeBotRightCorner: function(board, marker) {
+        board[2][2].letter = marker;
+      },
+
+      takeBotLeftCorner: function(board, marker) {
+        board[2][0].letter = marker;
+      },
+
+      allEmpty: function(group) {
+        for(var i = 0; i < group.length; i++) {
+          if (group[i] !== EMPTY) {return false}
+        }
+        return true
+      },
+
+      //------------------ PLAY OPPOSITE CORNER IF FREE ------------------//
+
+      playerTookCornerandOppoCornerFree: function(board, player) {
+        var diagonals = [[0,0], [0,2], [2,2], [2,0]]
+        
+        for (var i = 0; i < diagonals.length; i++) {
+          var row = diagonals[i][0]
+          var box = diagonals[i][1]
+          if (board[row][box].letter === player && this.oppoCornerFree(board, diagonals[i])) {
+            return true
+          }
+        }
+        return false;
+      },
+
+      oppoCornerFree: function(board, cornerCoordinates) {
+        var opporow = cornerCoordinates[0] === 2 ? 0 : 2
+        var oppobox = cornerCoordinates[1] === 2 ? 0 : 2
+
+        return board[opporow][oppobox].letter === EMPTY
+      },
+
+      playOppoCorner: function(board, player, cpu) {
+        var diagonals = [[0,0], [0,2], [2,2], [2,0]]
+        
+        for (var i = 0; i < diagonals.length; i++) {
+          var row = diagonals[i][0]
+          var box = diagonals[i][1]
+          var opporow = (row === 2) ? 0 : 2
+          var oppobox = (box === 2) ? 0 : 2
+
+          if (board[row][box].letter === player && this.oppoCornerFree(board, diagonals[i])) {
+            board[opporow][oppobox].letter = cpu
+            break
+          }
+        }
+        return false;
+      },
+
+      //------------------ PLAY A CORNER IF ALL FREE (PLAYER TOOK MIDDLE) ------------------//
+
+      canGetTwoInaRow: function(board, cpu) {
+        var rows  = gameService.groupRows(board);
+        var cols  = gameService.groupColumns(board);
+        var diags = gameService.groupDiagonals(board);
+        
+        if (this.checkGroups(rows, cpu)) {return true};
+        if (this.checkGroups(cols, cpu)) {return true};
+        if (this.checkGroups(diags, cpu)) {return true};
+      },
+
+      checkGroups: function(groups, cpu) {
+        for (var i = 0; i < groups.length; i++) {
+          if (this.canGetTwo(groups[i])) {return true}
+        } 
+        return false;
+      },
+
+      canGetTwo: function(array, cpu) {
+        if (array.hasNumValues(EMPTY, 2) && array.hasNumValues(cpu, 1)) {
+          return true
+        }
+        return false
+      },
+
+      getTwo: function(board, cpu) {
+        var rows  = gameService.groupRows(board);
+        var cols  = gameService.groupRows(board);
+        var diags = gameService.groupDiagonals(board);
+
+        if (this.checkGroups(rows, cpu)) {
+          this.getTwo_Rows(board, rows, cpu)
+        }
+        else if (this.checkGroups(cols, cpu)) {
+          this.getTwo_Cols(board, cols, cpu)
+        }
+        else if (this.checkGroups(diag, cpu)) {
+          this.getTwo_Diags(board, diags, cpu)
+        }
+      },
+
+      getTwo_Rows: function(board, rows, cpu) {
+        for (var i = 0; i < rows.length; i++) {
+          if (this.canGetTwo(rows[i])) {
+            var boxNum = rows[i].indexOf(EMPTY);
+            board[i][boxNum].letter = cpu;
+          }
+        }
+      },
+
+      getTwo_Cols: function(board, cols, cpu) {
+        for (var i = 0; i < columns.length; i++) {
+          if (this.canGetTwo(cols[i])) {
+            var rowNum = columns[i].indexOf(EMPTY);
+            board[rowNum][i].letter = cpu;
+          }
+        }
+      },
+
+      getTwo_Diags: function(board, diags, cpu) {
+        var topBottom = diags[0]
+        var bottomTop = diags[1]
+
+        if (this.canGetTwo(topBottom)) {
+          var i = topBottom.indexOf(EMPTY);
+          board[i][i].letter = cpu; //topBottom ([0,0]->[2,2] have same number)
+        }
+        else if (this.canGetTwo(bottomTop)) {
+          var i = bottomTop.indexOf(EMPTY);
+          board[2 - i][i].letter = cpu; // //bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
         }
       },
 
@@ -261,12 +454,25 @@ ailogicServices.factory('ailogicService',
         return true;
       },
 
-      takeCorner: function(board, compMarker) {
-        board[0][0].letter = compMarker;
+      takeCorner: function(board, cpu) {
+        board[0][0].letter = cpu;
       },
 
       getCorners: function(board) {
         return [board[0][0].letter, board[0][2].letter, board[2][0].letter, board[2][2].letter];
+      },
+
+      // ---------------- TAKE ANY EMPTY SQUARE ----------------//
+
+      takeEmptySquare: function(board, marker) {
+        var length = board.length
+        for (var row = 0; row < length; row++) {
+          for (var i = 0; i < length; i++) {
+            if (board[row][i].letter === EMPTY) {
+              return board[row][i].letter = marker;
+            }
+          }
+        }
       },
 
     }
