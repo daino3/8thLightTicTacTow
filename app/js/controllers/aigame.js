@@ -3,6 +3,8 @@
 var aiGameCtrl = angular.module('controllers.aigame', ['services.game', 'services.ailogic'])
 
 var EMPTY = ""
+var PLAYER = "X"
+var COMPUTER = "O"
 
 aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicService',
   function($firebase, $scope, gameService, ailogicService) {
@@ -11,8 +13,8 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
 
     $scope.playerName = EMPTY;
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
-    $scope.playerMarker = "X";
-    $scope.computerMarker = "O";
+    $scope.playerMarker = PLAYER;
+    $scope.computerMarker = COMPUTER;
     $scope.currentPlayer = EMPTY;
     $scope.board = gameService.gameBoard();
 
@@ -34,7 +36,7 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       if ($scope.currentPlayer === EMPTY) {
         alert("You must flip the coin to determine who goes first");
       }
-      else if (box.letter === $scope.playerMarker || box.letter === $scope.computerMarker) {
+      else if (box.letter !== EMPTY) {
         alert("Select an open square!!!");
       }
       else {
@@ -90,15 +92,19 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       }
       else if ($scope.cornersAreOpen()) {
         console.log("All Corners Are Open")
-        ailogicService.takeCorner($scope.board, $scope.computerMarker);
+        $scope.takeCorner();
       }
-      else if ($scope.trapped($scope.board, $scope.playerMarker, $scope.computerMarker)) {
+      else if ($scope.trapped()) {
         console.log("trapped")
-        $scope.takeMiddleSide($scope.board, $scope.computerMarker)
+        $scope.takeMiddleSide()
       }
-      else if ($scope.openCorner() && $scope.playerTookCorner()){
+      else if ($scope.playerTookCornerandOppoCornerFree()){
         console.log("Player Took a Corner")
         $scope.playOppoCorner();
+      }
+      else if ($scope.canGetTwoInaRow($scope.board, $scope.computerMarker)) {
+        console.log("Getting two in a row")
+        $scope.getTwoinaRow();
       }
       else {
         console.log("No Other Move")
@@ -106,41 +112,65 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       }
     }
 
-    //----------- TRAPPED ------------//
+    //-------------- TRAPPED ---------------//
 
-    $scope.trapped = function(board, playerMarker, compMarker) {
-      var middle   = board[1][1].letter
-      var topleft  = board[0][0].letter
-      var topright = board[0][2].letter
-      var botleft  = board[2][0].letter
-      var botright = board[2][2].letter
-
-      if (topleft === playerMarker && botright === playerMarker && middle === compMarker) {
-        return true
-      }
-      else if (botleft === playerMarker && topright === playerMarker && middle === compMarker) {
-        return true
-      }
-      return false
+    $scope.trapped = function() {
+      return ailogicService.trapped($scope.board, $scope.playerMarker, $scope.compMarker);
     }
 
-    $scope.takeMiddleSide = function(board, compMarker) {
-      board[1][0].letter = compMarker
+    $scope.takeMiddleSide = function() {
+      $scope.board[1][0].letter = $scope.compMarker
     }
 
-    $scope.takeEmptySquare = function(board, compMarker) {
-      for (var row = 0; row < board.length; row++) {
-        for (var i = 0; i < board.length; i++) {
-          if (board[row][i].letter === EMPTY) {
-            board[row][i].letter = compMarker
-          }
+    //----------- CAN GET TWO IN A ROW ------------//
+
+    $scope.canGetTwoInaRow = function(board, marker) {
+      var rows = gameService.groupRows(board);
+      var cols = gameService.groupRows(board);
+      var diag = gameService.groupDiagonals(board);
+      
+      if ($scope.oneboxtaken(rows, marker)) {return true};
+      if ($scope.oneboxtaken(cols, marker)) {return true};
+      if ($scope.oneboxtaken(diag, marker)) {return true};
+    }
+
+    $scope.oneboxtaken = function(array, marker) {
+      for (var i = 0; i < array.length; i++) {
+        var empties = array[i].filter(function(e) {return e === EMPTY}).length
+        var markers = array[i].filter(function(e) {return e === marker}).length
+        if (empties === 2 && markers === 1) {
+          return true;
         }
       }
+      return false;
     }
 
-    $scope.openCorner = function() {
-      return ailogicService.openCorner($scope.board)      
+    $scope.getTwo = function(board, marker) {
+      var rows = gameService.groupRows(board);
+      var cols = gameService.groupRows(board);
+      var diag = gameService.groupDiagonals(board);
+
+      if ($scope.oneboxtaken(rows, marker)) {
+
+      }
+      else if ($scope.oneboxtaken(cols, marker)) {
+
+      }
+      else if ($scope.oneboxtaken(diag, marker)) {
+
+      }
+
     }
+
+    $scope.getTwo_Rows = function(board, compMarker) {
+      var rows = gameService.groupRows(board);
+      for (var index = 0; index < board.length; index++) {
+        if (rows[index].hasTwoSameValues(PLAYER, COMPUTER) && rows[index].hasEmptyBox(2)) {
+          var boxNum = rows[index].indexOf(EMPTY);
+          board[index][boxNum].letter = compMarker;
+        }
+      }
+    },
 
     //----------- TAKE MIDDLE IF OPEN ------------//
 
@@ -180,24 +210,29 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
       ailogicService.createFork($scope.board, $scope.computerMarker);
     }
 
-    //-------------- ADJACENT CORNER LOGIC ---------------//
+    //------------ PLAY OPPO CORNERS ---------------//
 
-    // $scope.playAdjacentCorner = function() {
-    //   ailogicService.playAdjacentCorner($scope.board, $scope.computerMarker);
-    // }
-
-    //------------ OTHER CPU MOVES ---------------//
-
-    $scope.playerTookCorner = function() {
-      return ailogicService.playerTookCorner($scope.board, $scope.playerMarker);
+    $scope.playerTookCornerandOppoCornerFree = function() {
+      return ailogicService.playerTookCornerandOppoCornerFree($scope.board, $scope.playerMarker);
     }
 
     $scope.playOppoCorner = function() {
       ailogicService.playOppoCorner($scope.board, $scope.playerMarker, $scope.computerMarker);
     }
 
+
+    //------------ OTHER CPU MOVES ---------------//
+
     $scope.cornersAreOpen = function() {
       return ailogicService.cornersAreOpen($scope.board);
+    }
+
+    $scope.takeCorner = function() {
+      ailogicService.takeCorner($scope.board, $scope.computerMarker);
+    }
+
+    $scope.takeEmptySquare = function() {
+      ailogic.takeEmptySquare($scope.board, $scope.compMarker)
     }
 
     //------------ OTHER GAME METHODS ---------------//
@@ -214,5 +249,4 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     $scope.saveWin = function() {
       ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
     }
-
 }])
