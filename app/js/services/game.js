@@ -92,13 +92,6 @@ gameServices.factory('gameService',
         return diagonals
       },
 
-      //------------- Other ------------//
-
-      flipCoin: function() {
-        var coin = Math.floor(Math.random() * 2);
-        return (coin === 0) ? PLAYER2 : PLAYER1;
-      },
-
       //------------- Board Full ------------//
 
       boardFull: function(board) {
@@ -110,6 +103,12 @@ gameServices.factory('gameService',
         return true
       },
 
+      //------------- Other ------------//
+
+      flipCoin: function() {
+        var coin = Math.floor(Math.random() * 2);
+        return (coin === 0) ? PLAYER2 : PLAYER1;
+      },
     }
   }
 );
