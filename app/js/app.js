@@ -6,11 +6,11 @@ var myApp = angular.module('myApp', [
   'ngRoute',
   'filters',
   'directives',
-  'services.ailogic',
+  'services.cpulogic',
   'services.game',
   'controllers.welcome',
   'controllers.localgame',
-  'controllers.aigame',
+  'controllers.cpugame',
   'controllers.hostedgame',
   'firebase'
 ])
@@ -18,7 +18,7 @@ var myApp = angular.module('myApp', [
 myApp.config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/welcome', {templateUrl: 'partials/welcome.html', controller: 'Welcome'});
   $routeProvider.when('/localgame', {templateUrl: 'partials/game.html', controller: 'LocalGame'});
-  $routeProvider.when('/AIgame', {templateUrl: 'partials/game.html', controller: 'AIGame'});
+  $routeProvider.when('/CPUgame', {templateUrl: 'partials/game.html', controller: 'CPUGame'});
   $routeProvider.when('/hostedgame', {templateUrl: 'partials/game.html', controller: 'HostedGame'});
   $routeProvider.otherwise({redirectTo: '/welcome'});
 }]);

@@ -1,13 +1,13 @@
 'use strict';
 
-var aiGameCtrl = angular.module('controllers.aigame', ['services.game', 'services.ailogic'])
+var cpuGameCtrl = angular.module('controllers.cpugame', ['services.game', 'services.cpulogic'])
 
 var EMPTY = ""
 var PLAYER = "X"
 var COMPUTER = "O"
 
-aiGameCtrl.controller('AIGame', ['$scope', 'gameService','ailogicService',
-  function($scope, gameService, ailogicService) {
+cpuGameCtrl.controller('CPUGame', ['$scope', 'gameService','cpuLogicService',
+  function($scope, gameService, cpuLogicService) {
 
     $scope.playerName = EMPTY;
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
@@ -69,7 +69,7 @@ aiGameCtrl.controller('AIGame', ['$scope', 'gameService','ailogicService',
     }
 
     $scope.computerMove = function() {
-      ailogicService.computerMove($scope.board, $scope.playerMarker, $scope.computerMarker)
+      cpuLogicService.computerMove($scope.board, $scope.playerMarker, $scope.computerMarker)
     }
 
     $scope.resetBoard = function() {
