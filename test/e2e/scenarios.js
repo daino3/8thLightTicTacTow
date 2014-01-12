@@ -2,44 +2,19 @@
 
 /* http://docs.angularjs.org/guide/dev_guide.e2e-testing */
 
+// I gave up on implementing e2e tests because I think this is an outdated angular-seed? 
+// I couldn't manipulate elements of the DOM via angular.element() and frustratingly, I couldn't 
+// stop the e2e test process via pause() or debugger to play around in the console. 
+// I would have tested on click function and the rendering of the board / partial
+
 describe('my app', function() {
 
   beforeEach(function() {
-    browser().navigateTo('app/index.html');
+    browser().navigateTo('/app/index.html');
   });
 
-
-  it('should automatically redirect to /view1 when location hash/fragment is empty', function() {
-    expect(browser().location().url()).toBe("/view1");
+  it('should automatically redirect to /welcome when location hash/fragment is empty', function() {
+    expect(browser().location().url()).toBe("/welcome");
   });
 
-
-  describe('view1', function() {
-
-    beforeEach(function() {
-      browser().navigateTo('#/view1');
-    });
-
-
-    it('should render view1 when user navigates to /view1', function() {
-      expect(element('[ng-view] p:first').text()).
-        toMatch(/partial for view 1/);
-    });
-
-  });
-
-
-  describe('view2', function() {
-
-    beforeEach(function() {
-      browser().navigateTo('#/view2');
-    });
-
-
-    it('should render view2 when user navigates to /view2', function() {
-      expect(element('[ng-view] p:first').text()).
-        toMatch(/partial for view 2/);
-    });
-
-  });
 });

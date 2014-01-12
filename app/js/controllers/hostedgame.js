@@ -5,6 +5,8 @@ var hostedGameCtrl = angular.module('controllers.hostedgame', ['services.game'])
 hostedGameCtrl.controller('HostedGame', ['$firebase', '$scope', 'gameService',
   function($firebase, $scope, angularFire, gameService) {
 
+    // TBD
+
     var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
     angularFire(record, $scope, "playerRecord");
 

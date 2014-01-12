@@ -24,8 +24,6 @@ cpulogicServices.factory('cpuLogicService',
                         this.canGetTwoInaRow(board, cpu) || 
                         this.takeEmptySquare(board)
                         );
-
-        console.log(this.createOrBlockFork(board, cpu, cpu))
         this.takeSquare(board, bestMove, cpu);
       },
 
