@@ -29,13 +29,31 @@ gameServices.factory('gameService',
         return (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)) ? true : false 
       },
 
-      //----------- ROWS -------------//
+      //----- CHECKS ----- //
 
       checkRows: function(board) {
         var rows = this.groupRows(board);
         return this.checkGroups(rows);
       },
 
+      checkColumns: function(board) {
+        var columns = this.groupColumns(board)
+        return this.checkGroups(columns);
+      },
+
+      checkDiagonals: function(board) {
+        var diagonals = this.groupDiagonals(board)
+        return this.checkGroups(diagonals);
+      },
+
+      checkGroups: function(groups) {
+        for (var i = 0; i < groups.length; i++) {
+          if (groups[i].allSameValues()) {return true;}
+        }
+        return false;        
+      },
+
+      //----- GROUP ----- //
 
       groupRows: function(board){
         var firstRow  = [board[0][0], board[0][1], board[0][2]].mapToLetters();
@@ -43,13 +61,6 @@ gameServices.factory('gameService',
         var thirdRow  = [board[2][0], board[2][1], board[2][2]].mapToLetters();
         var rows = [firstRow, secondRow, thirdRow]
         return rows
-      },
-
-      //----------- COLUMNS -------------//
-
-      checkColumns: function(board) {
-        var columns = this.groupColumns(board)
-        return this.checkGroups(columns);
       },
 
       groupColumns: function(board) {
@@ -60,27 +71,11 @@ gameServices.factory('gameService',
         return columns
       },
 
-      //----------- DIAGONALS -------------//
-
-      checkDiagonals: function(board) {
-        var diagonals = this.groupDiagonals(board)
-        return this.checkGroups(diagonals);
-      },
-
       groupDiagonals: function(board) {
         var topBottom = [board[0][0], board[1][1], board[2][2]].mapToLetters();
         var bottomTop = [board[2][0], board[1][1], board[0][2]].mapToLetters();
         var diagonals = [topBottom, bottomTop]
         return diagonals
-      },
-
-      //------------- CHECK GROUPINGS ------------//
-
-      checkGroups: function(groups) {
-        for (var i = 0; i < groups.length; i++) {
-          if (groups[i].allSameValues()) {return true;}
-        }
-        return false;        
       },
 
       //------------- BOARD FULL ------------//
