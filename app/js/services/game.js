@@ -26,73 +26,64 @@ gameServices.factory('gameService',
       },
 
       winner: function(board) {
-        if (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)){
-          return true
-        }
-        return false
+        return (this.checkRows(board) || this.checkColumns(board) || this.checkDiagonals(board)) ? true : false 
       },
 
-      //----------- Rows -------------//
+      //----------- ROWS -------------//
 
       checkRows: function(board) {
-        var rows = this.groupRows(board)
-        for (var i = 0; i < rows.length; i++) {
-          if (rows[i].allSameValues()) {
-            return true;
-          }
-        }
-        return false;
+        var rows = this.groupRows(board);
+        return this.checkGroups(rows);
       },
 
+
       groupRows: function(board){
-        var b = board
-        var firstRow  = [b[0][0].letter, b[0][1].letter, b[0][2].letter]
-        var secondRow = [b[1][0].letter, b[1][1].letter, b[1][2].letter]
-        var thirdRow  = [b[2][0].letter, b[2][1].letter, b[2][2].letter]
+        var firstRow  = [board[0][0], board[0][1], board[0][2]].mapToLetters();
+        var secondRow = [board[1][0], board[1][1], board[1][2]].mapToLetters();
+        var thirdRow  = [board[2][0], board[2][1], board[2][2]].mapToLetters();
         var rows = [firstRow, secondRow, thirdRow]
         return rows
       },
 
-      //----------- Columns -------------//
+      //----------- COLUMNS -------------//
 
       checkColumns: function(board) {
         var columns = this.groupColumns(board)
-        for (var i = 0; i < columns.length; i++) {
-          if (columns[i].allSameValues()) {
-            return true;
-          }
-        }
-        return false;
+        return this.checkGroups(columns);
       },
 
       groupColumns: function(board) {
-        var b = board
-        var firstColumn  = [b[0][0].letter, b[1][0].letter, b[2][0].letter]
-        var secondColumn = [b[0][1].letter, b[1][1].letter, b[2][1].letter]
-        var thirdColumn  = [b[0][2].letter, b[1][2].letter, b[2][2].letter]
+        var firstColumn  = [board[0][0], board[1][0], board[2][0]].mapToLetters();
+        var secondColumn = [board[0][1], board[1][1], board[2][1]].mapToLetters();
+        var thirdColumn  = [board[0][2], board[1][2], board[2][2]].mapToLetters();
         var columns = [firstColumn, secondColumn, thirdColumn]
         return columns
       },
 
-      //----------- Diagonals -------------//
+      //----------- DIAGONALS -------------//
 
       checkDiagonals: function(board) {
         var diagonals = this.groupDiagonals(board)
-        if (diagonals[0].allSameValues() || diagonals[1].allSameValues()) {
-          return true;
-        }
-        return false
+        return this.checkGroups(diagonals);
       },
 
       groupDiagonals: function(board) {
-        var b = board
-        var topBottom = [b[0][0].letter, b[1][1].letter, b[2][2].letter]
-        var bottomTop = [b[2][0].letter, b[1][1].letter, b[0][2].letter]
+        var topBottom = [board[0][0], board[1][1], board[2][2]].mapToLetters();
+        var bottomTop = [board[2][0], board[1][1], board[0][2]].mapToLetters();
         var diagonals = [topBottom, bottomTop]
         return diagonals
       },
 
-      //------------- Board Full ------------//
+      //------------- CHECK GROUPINGS ------------//
+
+      checkGroups: function(groups) {
+        for (var i = 0; i < groups.length; i++) {
+          if (groups[i].allSameValues()) {return true;}
+        }
+        return false;        
+      },
+
+      //------------- BOARD FULL ------------//
 
       boardFull: function(board) {
         for (var row = 0; row < board.length; row++) {
@@ -103,7 +94,7 @@ gameServices.factory('gameService',
         return true
       },
 
-      //------------- Other ------------//
+      //------------- OTHER ------------//
 
       flipCoin: function() {
         var coin = Math.floor(Math.random() * 2);
@@ -113,7 +104,7 @@ gameServices.factory('gameService',
   }
 );
 
-//------------- Prototypes --------------//
+//------------- PROTOTYPES --------------//
 
 Array.prototype.allSameValues = function() {
   for (var i = 1; i < this.length; i++) {
@@ -127,4 +118,11 @@ Array.prototype.allSameValues = function() {
 Array.prototype.hasNumValues = function(val, num) {
   var values = this.filter(function(e) {return e === val}).length
   return values === num ? true : false
+}
+
+Array.prototype.mapToLetters = function() {
+  for (var i = 0; i < this.length; i++) {
+    this[i] = this[i].letter
+  }
+  return this
 }

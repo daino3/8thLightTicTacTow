@@ -2,11 +2,11 @@
 
 /* jasmine specs for controllers go here */
 
-describe('controllers', function(){
-  beforeEach(module('myApp.controllers'));
+describe('LocalGame', function(){
+  beforeEach(module('controllers.localgame'));
 
 
-  it('should ....', inject(function() {
+  it('should require players to flip a coin to start the game', inject(function() {
     //spec body
   }));
 
