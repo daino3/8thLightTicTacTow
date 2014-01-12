@@ -1,8 +1,5 @@
 'use strict';
 
-// Demonstrate how to register services
-// In this case it is a simple value service.
-
 var EMPTY = ""
 var PLAYER = "X"
 var COMPUTER = "O"
@@ -49,10 +46,7 @@ ailogicServices.factory('ailogicService',
       //------------- BLOCK OR WIN -------------//
 
       someoneCanWin: function(board) {
-        if ( this.canWinViaRows(board) === true || this.canWinViaColumns(board) === true || this.canWinViaDiagonals(board) === true) {
-          return true;
-        }
-        return false;
+        return (this.canWinViaRows(board) || this.canWinViaColumns(board) || this.canWinViaDiagonals(board))
       },
 
       blockOrWin: function(board, cpu) {
@@ -69,8 +63,6 @@ ailogicServices.factory('ailogicService',
           return false;
         }
       },
-
-      //---------- WIN / BLOCK: ROWS ------------//
 
       canWinViaRows: function(board) {
         var rows = gameService.groupRows(board);
@@ -92,8 +84,6 @@ ailogicServices.factory('ailogicService',
         }
       },
 
-      //---------- WIN / BLOCK: COLUMNS ------------//
-
       canWinViaColumns: function(board) {
         var columns = gameService.groupColumns(board);
         for (var index = 0; index < columns.length; index++) {
@@ -114,8 +104,6 @@ ailogicServices.factory('ailogicService',
         }
       },
 
-      //----------- WIN / BLOCK: DIAGONALS --------------//
-
       canWinViaDiagonals: function(board) {
         var diagonals = gameService.groupDiagonals(board);
         for (var index = 0; index < diagonals.length; index++) {
@@ -130,11 +118,11 @@ ailogicServices.factory('ailogicService',
         var diagonals = gameService.groupDiagonals(board);
         if (this.canWin(diagonals[0])) {
           var index = diagonals[0].indexOf(EMPTY);
-          board[index][index].letter = cpu; //topBottom ([0,0]->[2,2] have same number)
+          board[index][index].letter = cpu; // topBottom ([0,0]->[2,2] have same number)
         }
         else if (this.canWin(diagonals[1])){
           var index = diagonals[1].indexOf(EMPTY);
-          board[2 - index][index].letter = cpu; // //bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
+          board[2 - index][index].letter = cpu; // bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
         }
         else {
           return false;
@@ -142,10 +130,7 @@ ailogicServices.factory('ailogicService',
       },
 
       canWin: function(group) {
-        if ((group.hasNumValues(PLAYER, 2) || group.hasNumValues(COMPUTER, 2)) && group.hasNumValues(EMPTY, 1)) {
-          return true
-        }
-        return false
+        return ((group.hasNumValues(PLAYER, 2) || group.hasNumValues(COMPUTER, 2)) && group.hasNumValues(EMPTY, 1))
       },
 
       //------------------ TRAPPED --------------------//
@@ -157,12 +142,8 @@ ailogicServices.factory('ailogicService',
         var botleft  = board[2][0].letter
         var botright = board[2][2].letter
 
-        if (topleft === player && botright === player && middle === cpu) {
-          return true
-        }
-        else if (botleft === player && topright === player && middle === cpu) {
-          return true
-        }
+        if (topleft === player && botright === player && middle === cpu) {return true}
+        else if (botleft === player && topright === player && middle === cpu) {return true}
         return false
       },
 
@@ -180,7 +161,7 @@ ailogicServices.factory('ailogicService',
         board[1][1].letter = cpu;
       },
 
-      //------------------ CREATING A 'FORK' ------------------//
+      //------------------ CREATE A 'FORK' ------------------//
 
       canCreateFork: function(board, marker) {
         var topleft    = board[0][0].letter
@@ -197,52 +178,26 @@ ailogicServices.factory('ailogicService',
           return false
         }
         else if (topleft === marker) {
-          if (this.allEmpty([topmiddle, topright, botleft])) {
-            return true
-          }
-          else if (this.allEmpty([midleft, botleft, topright])) {
-            return true
-          }
-          else {
-            return false
-          }
+          if (this.allEmpty([topmiddle, topright, botleft])) {return true}
+          else if (this.allEmpty([midleft, botleft, topright])) {return true}
+          else {return false}
         }
         else if (topright === marker) {
-          if (this.allEmpty([topleft, topmiddle, botright])) {
-            return true
-          }
-          else if (this.allEmpty([botright, midright, topleft])) {
-            return true
-          }
-          else {
-            return false
-          }
+          if (this.allEmpty([topleft, topmiddle, botright])) {return true}
+          else if (this.allEmpty([botright, midright, topleft])) {return true}
+          else {return false}
         }
         else if (botright === marker) {
-          if (this.allEmpty([topright, midright, botleft])) {
-            return true
-          }
-          else if (this.allEmpty([botleft, botmiddle, topright])) {
-            return true
-          }
-          else {
-            return false
-          }
+          if (this.allEmpty([topright, midright, botleft])) {return true}
+          else if (this.allEmpty([botleft, botmiddle, topright])) {return true}
+          else {return false}
         }
         else if (botleft === marker) {
-          if (this.allEmpty([botright, botmiddle, topleft])) {
-            return true
-          }
-          else if (this.allEmpty([topleft, midleft, botright])) {
-            return true
-          }
-          else {
-            return false
-          }
+          if (this.allEmpty([botright, botmiddle, topleft])) {return true}
+          else if (this.allEmpty([topleft, midleft, botright])) {return true}
+          else {return false}
         }
-        else {
-          return false
-        }
+        else {return false}
       },
 
       createOrBlockFork: function(board, marker1, marker2) {
@@ -266,9 +221,7 @@ ailogicServices.factory('ailogicService',
           else if (this.allEmpty([midleft, botleft, topright])) {
             this.takeBotLeftCorner(board, marker2)
           }
-          else {
-            return false
-          }
+          else {return false}
         }
         else if (topright === marker1) {
           if (this.allEmpty([topleft, topmiddle, botright])) {
@@ -277,9 +230,7 @@ ailogicServices.factory('ailogicService',
           else if (this.allEmpty([botright, midright, topleft])) {
             this.takeBotRightCorner(board, marker2)
           }
-          else {
-            return false
-          }
+          else {return false}
         }
         else if (botright === marker1) {
           if (this.allEmpty([topright, midright, botleft])) {
@@ -288,9 +239,7 @@ ailogicServices.factory('ailogicService',
           else if (this.allEmpty([botleft, botmiddle, topright])) {
             this.takeBotLeftCorner(board, marker2)
           }
-          else {
-            return false
-          }
+          else {return false}
         }
         else if (botleft === marker1) {
           if (this.allEmpty([botright, botmiddle, topleft])) {
@@ -299,13 +248,9 @@ ailogicServices.factory('ailogicService',
           else if (this.allEmpty([topleft, midleft, botright])) {
             this.takeTopLeftCorner(board, marker2)
           }
-          else {
-            return false
-          }
+          else {return false}
         }
-        else {
-          return false
-        }
+        else {return false}
       },
 
       takeTopLeftCorner: function(board, marker) {
@@ -339,31 +284,29 @@ ailogicServices.factory('ailogicService',
         for (var i = 0; i < diagonals.length; i++) {
           var row = diagonals[i][0]
           var box = diagonals[i][1]
-          if (board[row][box].letter === player && this.oppoCornerFree(board, diagonals[i])) {
-            return true
-          }
+          if (board[row][box].letter === player && this.oppoCornerFree(board, diagonals[i])) {return true}
         }
         return false;
       },
 
       oppoCornerFree: function(board, cornerCoordinates) {
-        var opporow = cornerCoordinates[0] === 2 ? 0 : 2
-        var oppobox = cornerCoordinates[1] === 2 ? 0 : 2
+        var opporow = cornerCoordinates[0] === 2 ? 0 : 2;
+        var oppobox = cornerCoordinates[1] === 2 ? 0 : 2;
 
-        return board[opporow][oppobox].letter === EMPTY
+        return board[opporow][oppobox].letter === EMPTY;
       },
 
       playOppoCorner: function(board, player, cpu) {
-        var diagonals = [[0,0], [0,2], [2,2], [2,0]]
+        var diagonals = [[0,0], [0,2], [2,2], [2,0]];
         
         for (var i = 0; i < diagonals.length; i++) {
-          var row = diagonals[i][0]
-          var box = diagonals[i][1]
-          var opporow = (row === 2) ? 0 : 2
-          var oppobox = (box === 2) ? 0 : 2
+          var row = diagonals[i][0];
+          var box = diagonals[i][1];
+          var opporow = (row === 2) ? 0 : 2;
+          var oppobox = (box === 2) ? 0 : 2;
 
           if (board[row][box].letter === player && this.oppoCornerFree(board, diagonals[i])) {
-            board[opporow][oppobox].letter = cpu
+            board[opporow][oppobox].letter = cpu;
             break
           }
         }
@@ -390,10 +333,7 @@ ailogicServices.factory('ailogicService',
       },
 
       canGetTwo: function(array, cpu) {
-        if (array.hasNumValues(EMPTY, 2) && array.hasNumValues(cpu, 1)) {
-          return true
-        }
-        return false
+        return (array.hasNumValues(EMPTY, 2) && array.hasNumValues(cpu, 1))
       },
 
       getTwo: function(board, cpu) {
@@ -436,11 +376,11 @@ ailogicServices.factory('ailogicService',
 
         if (this.canGetTwo(topBottom)) {
           var i = topBottom.indexOf(EMPTY);
-          board[i][i].letter = cpu; //topBottom ([0,0]->[2,2] have same number)
+          board[i][i].letter = cpu; // topBottom ([0,0]->[2,2] have same number)
         }
         else if (this.canGetTwo(bottomTop)) {
           var i = bottomTop.indexOf(EMPTY);
-          board[2 - i][i].letter = cpu; // //bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
+          board[2 - i][i].letter = cpu; // bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
         }
       },
 
@@ -459,7 +399,7 @@ ailogicServices.factory('ailogicService',
       },
 
       getCorners: function(board) {
-        return [board[0][0].letter, board[0][2].letter, board[2][0].letter, board[2][2].letter];
+        return [board[0][0], board[0][2], board[2][0], board[2][2]].mapToLetters();
       },
 
       // ---------------- TAKE ANY EMPTY SQUARE ----------------//

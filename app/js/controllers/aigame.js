@@ -6,10 +6,8 @@ var EMPTY = ""
 var PLAYER = "X"
 var COMPUTER = "O"
 
-aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicService',
-  function($firebase, $scope, gameService, ailogicService) {
-    
-    var ref = new Firebase("https://tictactoe-dainer.firebaseio.com/");
+aiGameCtrl.controller('AIGame', ['$scope', 'gameService','ailogicService',
+  function($scope, gameService, ailogicService) {
 
     $scope.playerName = EMPTY;
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
@@ -73,8 +71,6 @@ aiGameCtrl.controller('AIGame', ['$firebase', '$scope', 'gameService','ailogicSe
     $scope.computerMove = function() {
       ailogicService.computerMove($scope.board, $scope.playerMarker, $scope.computerMarker)
     }
-
-    //------------ OTHER GAME METHODS ---------------//
 
     $scope.resetBoard = function() {
       $scope.board = gameService.gameBoard();    
