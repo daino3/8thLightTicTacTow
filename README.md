@@ -18,11 +18,12 @@ User's will have to hit the 'flip the coin' button to start either the local gam
 
 ### Running the app locally
 
-The app runs on localhost:8000. 
+The app runs on localhost:8000. The AI game runs at http://localhost:8000/app/index.html#/CPUgame
 
 ```
-$ node scripts/web-server.js
+$ node scripts/web-server
 ```
+
 
 ### Running unit tests
 ```
