@@ -39,3 +39,11 @@ stop the e2e test process via pause() or debugger to play around in the console.
 ``` 
 $ bash scripts/e2e-test.sh  
 ```
+
+note to author:
+things I had to change for heroku:
+1) scripts/web-server.js - added process.env.PORT to '.listen(process.env.PORT || 8888)'
+2) added Procfile with 'web: node scripts/web-server.js'
+3) cl:$ heroku ps:scale web=1
+4) installed gzippo and express with: cl:$ npm install gzippo express --save
+5) I unfortunately did not figure out how to delete the intro directory

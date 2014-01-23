@@ -7,13 +7,14 @@ var OPPONENT = "O"
 
 localGame.controller('LocalGame', ['$scope', 'gameService',
   function($scope, gameService) {
-    
+
     $scope.playerName = ""
     $scope.playerRecord = {wins: 0, losses: 0, ties: 0}
     $scope.playerMarker = PLAYER
     $scope.opponentMarker = OPPONENT
     $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
+    $scope.statusMessage = ""
 
     $scope.takeSquare = function(box) {
       if ($scope.currentPlayer == "") {
@@ -25,12 +26,13 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
         $scope.winCheck();
-      } 
+      }
     }
 
     $scope.winCheck = function() {
       if (gameService.winner($scope.board)) {
-        alert($scope.currentPlayer + " has won!!")
+        var winMessage = $scope.currentPlayer + " has won!!"
+        document.getElementById("winner").innerHTML = winMessage
         $scope.saveWin();
         $scope.resetBoard();
       }
@@ -49,7 +51,12 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
     }
 
     $scope.resetBoard = function() {
-      $scope.board = gameService.gameBoard()      
+      $scope.board = gameService.gameBoard()
+    }
+
+    $scope.resetButton = function() {
+      $scope.board = gameService.gameBoard()
+      document.getElementById("winner").innerHTML = ""
     }
 
     $scope.tieGame = function() {
@@ -62,14 +69,10 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
     }
 
     $scope.startGame = function() {
-      if ($scope.currentPlayer === "") {
-        $scope.currentPlayer = gameService.flipCoin();
-        alert("It's "+$scope.currentPlayer+"'s turn");
-      }
-      else {
-        alert("The game has already began! It's "+ $scope.currentPlayer + "'s turn")
-      }
-    }    
+      $scope.currentPlayer = gameService.flipCoin();
+      $scope.statusMessage = $scope.currentPlayer+" goes first";
+      document.getElementById("start-button").disabled = true;
+    }
 
     $scope.saveWin = function() {
       ($scope.playerMarker === $scope.currentPlayer) ? $scope.playerRecord.wins += 1 : $scope.playerRecord.losses += 1
