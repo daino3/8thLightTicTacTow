@@ -10,4 +10,5 @@ appDirectives.directive('appVersion', ['version',
     return function(scope, elm, attrs) {
       elm.text(version);
     };
-  }]);
+  }
+]);

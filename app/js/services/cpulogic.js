@@ -41,10 +41,10 @@ cpulogicServices.factory('cpuLogicService',
 
       blockorWinRows: function(board) {
         var rows = gameService.groupRows(board);
-        for (var index = 0; index < rows.length; index++) {
-          if (this.canWin(rows[index])) {
-            var boxNum = rows[index].indexOf(EMPTY);
-            return [index, boxNum]
+        for (var i = 0; i < board.length; i++) {
+          if (this.canWin(rows[i])) {
+            var boxNum = rows[i].indexOf(EMPTY);
+            return [i, boxNum]
           }
         }
         return false
@@ -52,10 +52,10 @@ cpulogicServices.factory('cpuLogicService',
 
       blockorWinColumns: function(board) {
         var columns = gameService.groupColumns(board);
-        for (var index = 0; index < columns.length; index++) {
-          if (this.canWin(columns[index])) {
-            var rowNum = columns[index].indexOf(EMPTY);
-            return [rowNum, index]
+        for (var i = 0; i < columns.length; i++) {
+          if (this.canWin(columns[i])) {
+            var rowNum = columns[i].indexOf(EMPTY);
+            return [rowNum, i]
           }
         }
         return false

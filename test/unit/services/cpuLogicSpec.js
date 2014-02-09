@@ -27,11 +27,11 @@ describe('services.cpuLogic', function() {
       game2[1][0].letter = game2[1][1].letter = CPU
 
       var game3 = gameService.gameBoard();
-      game3[2][1].letter = game3[2][2].letter = CPU
+      game3[2][0].letter = game3[2][2].letter = CPU
 
       expect(cpuLogicService.blockorWinRows(game1)).toEqual([0, 1]);
       expect(cpuLogicService.blockorWinRows(game2)).toEqual([1, 2]);
-      expect(cpuLogicService.blockorWinRows(game3)).toEqual([2, 0]);
+      expect(cpuLogicService.blockorWinRows(game3)).toEqual([2, 1]);
     }));
   });
 
