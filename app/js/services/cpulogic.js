@@ -14,7 +14,8 @@ cpulogicServices.factory('cpuLogicService',
 
       computerMove: function(board, player, cpu) {
         // This logic must remain consistent
-        var bestMove = (this.blockOrWin(board) || 
+        var bestMove = (this.blockOrWin(board, cpu) ||
+                        this.blockOrWin(board, player) || 
                         this.createOrBlockFork(board, player, cpu) || 
                         this.createOrBlockFork(board, cpu, cpu) || 
                         this.middleIsOpen(board) || 
@@ -27,7 +28,7 @@ cpulogicServices.factory('cpuLogicService',
         this.takeSquare(board, bestMove, cpu);
       },
 
-      takeSquare: function(board,coordinates, cpu) {
+      takeSquare: function(board, coordinates, cpu) {
         var row = coordinates[0]
         var box = coordinates[1]
         board[row][box].letter = cpu
@@ -35,14 +36,14 @@ cpulogicServices.factory('cpuLogicService',
 
       //------------- BLOCK OR WIN -------------//
 
-      blockOrWin: function(board) {
-        return (this.blockorWinRows(board) || this.blockorWinColumns(board) || this.blockorWinDiagonals(board))
+      blockOrWin: function(board, player) {
+        return (this.blockorWinRows(board, player) || this.blockorWinColumns(board, player) || this.blockorWinDiagonals(board, player))
       },
 
-      blockorWinRows: function(board) {
+      blockorWinRows: function(board, player) {
         var rows = gameService.groupRows(board);
         for (var i = 0; i < board.length; i++) {
-          if (this.canWin(rows[i])) {
+          if (this.canWin(rows[i], player)) {
             var boxNum = rows[i].indexOf(EMPTY);
             return [i, boxNum]
           }
@@ -50,10 +51,10 @@ cpulogicServices.factory('cpuLogicService',
         return false
       },
 
-      blockorWinColumns: function(board) {
+      blockorWinColumns: function(board, player) {
         var columns = gameService.groupColumns(board);
         for (var i = 0; i < columns.length; i++) {
-          if (this.canWin(columns[i])) {
+          if (this.canWin(columns[i], player)) {
             var rowNum = columns[i].indexOf(EMPTY);
             return [rowNum, i]
           }
@@ -61,21 +62,21 @@ cpulogicServices.factory('cpuLogicService',
         return false
       },
 
-      blockorWinDiagonals: function(board) {
+      blockorWinDiagonals: function(board, player) {
         var diagonals = gameService.groupDiagonals(board);
-        if (this.canWin(diagonals[0])) {
+        if (this.canWin(diagonals[0], player)) {
           var index = diagonals[0].indexOf(EMPTY);
           return [index, index] // topBottom ([0,0]->[2,2] have same number)
         }
-        else if (this.canWin(diagonals[1])){
+        else if (this.canWin(diagonals[1], player)){
           var index = diagonals[1].indexOf(EMPTY);
           return [2 - index, index] // bottomTop ([2,0]->[0,2] have opposite numbers; middle will never be open due to AI logic - see 'takemiddleifopen()'
         }
         else { return false; }
       },
 
-      canWin: function(group) {
-        return ((group.hasNumValues(PLAYER, 2) || group.hasNumValues(COMPUTER, 2)) && group.hasNumValues(EMPTY, 1))
+      canWin: function(group, player) {
+        return (group.hasNumValues(player, 2) && group.hasNumValues(EMPTY, 1))
       },
 
       //------------------ TRAPPED --------------------//

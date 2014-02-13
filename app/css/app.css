@@ -29,22 +29,43 @@
   padding: 0;
 }
 
-#game-board div{
-  border: 2px solid black;
-  height: 100px;
-  width: 100px;
-  display: inline-block;
-  text-align: center;
+#board-container {
+  position: relative;
+  width: 30%;
 }
 
-#game-board div div {
+.game-row {
+  width: 100%;
+}
+
+.game-cell {
+  display: inline-block;
+  width: 30%;
+  height: 100px;
+  border: 3px solid black;
+  text-align: center;
   font-size: 90px;
   overflow: hidden;
 }
 
-#game-board div div:hover{
+.game-cell:hover{
   cursor: pointer;
   background-color: #DCDCDC;  
+}
+
+#message-board {
+  width: 50%;
+  height: 125px;
+  border: 3px solid red;
+  color: red;
+  font-size: 25px;
+  background-color: white;
+  position: absolute;
+  top: 95px;
+  left: 20%;
+  display:none;
+  text-align: center;
+  line-height: 40px;
 }
 
 #name-and-record-div {

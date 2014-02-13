@@ -5,6 +5,13 @@ var localGame = angular.module('controllers.localgame', ['services.game'])
 var PLAYER = "X"
 var OPPONENT = "O"
 
+// SCRIPTS
+var SQUARE_TAKEN = "The game has already begun!"
+var FIRST_TURN   = "It's turn"
+var FLIP_COIN    = "You must flip the coin to determine who goes first"
+var OPEN_SQUARE  = "Select an open square!!!"
+var TIE_GAME     = "Game tied"
+
 localGame.controller('LocalGame', ['$scope', 'gameService',
   function($scope, gameService) {
 
@@ -14,14 +21,29 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
     $scope.opponentMarker = OPPONENT
     $scope.currentPlayer = ""
     $scope.board = gameService.gameBoard()
-    $scope.statusMessage = ""
+
+    $scope.startGame = function() {
+      $scope.currentPlayer = gameService.flipCoin();
+      $scope.showPopUp($scope.currentPlayer+" goes first")
+      document.getElementById("start-button").disabled = true;
+    }
+
+    $scope.showPopUp = function(message) {
+      var messageDiv = document.getElementById("message-board")
+      messageDiv.style.display = 'inline'
+      messageDiv.innerHTML = message
+      
+      setTimeout(function(){
+        messageDiv.style.display = 'none'
+      }, 1500);
+    }
 
     $scope.takeSquare = function(box) {
       if ($scope.currentPlayer == "") {
-        alert("You must flip the coin to determine who goes first")
+        $scope.showPopUp(FLIP_COIN)
       }
       else if (box.letter !== EMPTY) {
-        alert("Select an open square!!")
+        $scope.showPopUp(OPEN_SQUARE)
       }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
@@ -31,13 +53,12 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
 
     $scope.winCheck = function() {
       if (gameService.winner($scope.board)) {
-        var winMessage = $scope.currentPlayer + " has won!!"
-        document.getElementById("winner").innerHTML = winMessage
+        $scope.showPopUp($scope.currentPlayer + " has won!!")
         $scope.saveWin();
         $scope.resetBoard();
       }
       else if (gameService.boardFull($scope.board)) {
-        alert("Game is a tie")
+        $scope.showPopUp(TIE_GAME)
         $scope.tieGame()
         $scope.resetBoard();
       }
@@ -56,7 +77,6 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
 
     $scope.resetButton = function() {
       $scope.board = gameService.gameBoard()
-      document.getElementById("winner").innerHTML = ""
     }
 
     $scope.tieGame = function() {
@@ -66,12 +86,6 @@ localGame.controller('LocalGame', ['$scope', 'gameService',
     $scope.setName = function(e) {
       if (e.keyCode != 13) return;
         $scope.playerName = $scope.name
-    }
-
-    $scope.startGame = function() {
-      $scope.currentPlayer = gameService.flipCoin();
-      $scope.statusMessage = $scope.currentPlayer+" goes first";
-      document.getElementById("start-button").disabled = true;
     }
 
     $scope.saveWin = function() {

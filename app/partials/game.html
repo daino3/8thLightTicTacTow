@@ -1,9 +1,12 @@
 <body ng-controller="MyControllers">
 
-<div ng-repeat="row in board" id="game-board">
-    <div id="{{box.id}}" ng-repeat="box in row">
-        <div ng-click="takeSquare(box)">{{box.letter}}</div>
-    </div>
+<div id='board-container'>
+  <div ng-repeat="row in board" class="game-row">
+      <div id="{{box.id}}" class="game-cell" ng-repeat="box in row" ng-click="takeSquare(box)">
+        {{box.letter}}
+      </div>
+  </div>
+  <div id='message-board'></div>
 </div>
 
 <button ng-click="resetButton()" id="reset-button">Reset</button>
@@ -17,7 +20,4 @@
   <input type="text" ng-model="name" placeholder="Name" ng-keydown="setName($event)">
   <p>{{playerName}}</p>
   <p>wins: {{playerRecord.wins}}, losses: {{playerRecord.losses}}, ties: {{playerRecord.ties}}</p>
-  <p>{{statusMessage}}</p>
 </div>
-
-<div id="winner"></div>

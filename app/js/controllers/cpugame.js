@@ -6,6 +6,13 @@ var EMPTY = ""
 var PLAYER = "X"
 var COMPUTER = "O"
 
+// SCRIPTS
+var SQUARE_TAKEN = "The game has already begun!"
+var FIRST_TURN   = "It's turn"
+var FLIP_COIN    = "You must flip the coin to determine who goes first"
+var OPEN_SQUARE  = "Select an open square!!!"
+var TIE_GAME     = "Game tied"
+
 cpuGameCtrl.controller('CPUGame', ['$scope', 'gameService','cpuLogicService',
   function($scope, gameService, cpuLogicService) {
 
@@ -19,23 +26,34 @@ cpuGameCtrl.controller('CPUGame', ['$scope', 'gameService','cpuLogicService',
     $scope.startGame = function() {
       if ($scope.currentPlayer === EMPTY) {
         $scope.currentPlayer = gameService.flipCoin();
-        alert("It's "+$scope.currentPlayer+"'s turn");
+        $scope.showPopUp("It's "+ $scope.currentPlayer +"'s turn");
         if ($scope.currentPlayer === $scope.computerMarker){
           $scope.computerMove();
           $scope.switchPlayer();
         }
       }
       else {
-        alert("The game has already begun! It's "+ $scope.currentPlayer + "'s turn");
+        $scope.showPopUp("The game has already begun! It's "+ $scope.currentPlayer + "'s turn")
       }
+      document.getElementById("start-button").disabled = true;
     }   
+
+    $scope.showPopUp = function(message) {
+      var messageDiv = document.getElementById("message-board")
+      messageDiv.style.display = 'inline'
+      messageDiv.innerHTML = message
+      
+      setTimeout(function(){
+        messageDiv.style.display = 'none'
+      }, 1500);
+    }
 
     $scope.takeSquare = function(box) {
       if ($scope.currentPlayer === EMPTY) {
-        alert("You must flip the coin to determine who goes first");
+        $scope.showPopUp(FLIP_COIN)
       }
       else if (box.letter !== EMPTY) {
-        alert("Select an open square!!!");
+        $scope.showPopUp(OPEN_SQUARE);
       }
       else {
         gameService.takeSquare(box, $scope.currentPlayer);
@@ -50,22 +68,22 @@ cpuGameCtrl.controller('CPUGame', ['$scope', 'gameService','cpuLogicService',
     $scope.winCheck = function() {
       if (gameService.winner($scope.board)) {
         $scope.saveWin();
-        alert($scope.currentPlayer + " has won!!");
+        $scope.showPopUp($scope.currentPlayer + " has won!!");
         $scope.resetBoard();
       }
       else if (gameService.boardFull($scope.board)) {
         $scope.tieGame();
-        alert("Game tied");
+        $scope.showPopUp(TIE_GAME);
         $scope.resetBoard();
       }
     }
 
-    $scope.tieGame = function() {
-      $scope.playerRecord.ties += 1
-    }
-
     $scope.switchPlayer = function() {
       $scope.currentPlayer === $scope.computerMarker ? $scope.currentPlayer = $scope.playerMarker : $scope.currentPlayer = $scope.computerMarker
+    }
+
+    $scope.tieGame = function() {
+      $scope.playerRecord.ties += 1
     }
 
     $scope.computerMove = function() {
